@@ -8,6 +8,7 @@ import {
   Calculator,
   Settings,
   Users,
+  UserRound,
 } from 'lucide-react';
 
 // Import tab components
@@ -17,6 +18,8 @@ import QuarterlyTarget from './realtime/QuarterlyTarget';
 import RebateCalculationTab from './realtime/RebateCalculation';
 import RuleConfiguration from './realtime/RuleConfiguration';
 import SalespersonMonthly from './realtime/SalespersonMonthly';
+import MyShippingStats from './realtime/MyShippingStats';
+import SalesTargetManagement from './realtime/SalesTargetManagement';
 
 interface SubTab {
   key: string;
@@ -31,6 +34,18 @@ export default function RealtimeReports() {
 
 
   const subTabs: SubTab[] = [
+    {
+      key: 'my-shipping',
+      label: '我的出货统计',
+      icon: <UserRound className="w-4 h-4" />,
+      component: <MyShippingStats />,
+    },
+    {
+      key: 'sales-target-management',
+      label: '销售目标管理',
+      icon: <Target className="w-4 h-4" />,
+      component: <SalesTargetManagement />,
+    },
     {
       key: 'department',
       label: '部门出货统计',
@@ -63,7 +78,7 @@ export default function RealtimeReports() {
     },
     {
       key: 'config',
-      label: '配置规则',
+      label: '业绩归属配置',
       icon: <Settings className="w-4 h-4" />,
       component: <RuleConfiguration />,
     },

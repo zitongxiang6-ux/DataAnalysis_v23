@@ -914,7 +914,7 @@ function SendReportDialog({
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-[#E5E7EB] px-5 py-4">
-          <Button variant="outline" size="sm" onClick={onClose}>取消</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>重置</Button>
           <Button size="sm" onClick={handleSend}>确认发送</Button>
         </div>
       </div>
@@ -1295,7 +1295,7 @@ function SharedRecipientConfigDialog({
 
         <div className="flex items-center justify-end gap-2 border-t border-[#E5E7EB] px-5 py-4">
           <Button variant="outline" size="sm" onClick={onClose}>
-            取消
+            重置
           </Button>
           <Button size="sm" onClick={handleSave}>
             保存
@@ -1444,7 +1444,7 @@ function RecipientConfigDialog({
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-[#E5E7EB] px-5 py-4">
-          <Button variant="outline" size="sm" onClick={onClose}>取消</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>重置</Button>
           <Button size="sm" onClick={() => onSave(draftRules)}>
             保存接收人规则
           </Button>
@@ -1513,7 +1513,7 @@ function RecipientConfigDialog({
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-[#E5E7EB] px-5 py-4">
-          <Button variant="outline" size="sm" onClick={onClose}>取消</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>重置</Button>
           <Button size="sm" onClick={() => onSave(draftRules)}>保存接收人规则</Button>
         </div>
       </div>

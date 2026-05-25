@@ -3,7 +3,6 @@ import { KpiCard } from '@/components/ui/KpiCard';
 import { SectionCard } from '@/components/ui/SectionCard';
 import { DataTable } from '@/components/ui/DataTable';
 import type { Column } from '@/components/ui/DataTable';
-import { TabSwitcher } from '@/components/ui/TabSwitcher';
 import { Progress } from '@/components/ui/progress';
 import {
   Select,
@@ -18,10 +17,10 @@ import {
   type CustomerQuarterlyRow,
 } from './mockData';
 import {
-  DEPARTMENTS,
   SALESPERSON_NAMES,
   CUSTOMER_NAMES,
 } from '@/lib/mockData';
+import { SHIPPING_DEPARTMENTS } from './sharedOptions';
 import {
   LineChart,
   Line,
@@ -32,9 +31,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { Target, Download, RefreshCw } from 'lucide-react';
+import { Info, Target, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { UpdateDataDialog } from '@/components/UpdateDataDialog';
 
 const CUSTOMER_TYPE_OPTIONS = [
   '国际渠道商',
@@ -74,8 +74,6 @@ function QuarterCell({ actual, target }: { actual: number; target: number }) {
 export default function QuarterlyTarget() {
   const [quarterData] = useState(getQuarterlyData());
   const [customerData] = useState(getCustomerQuarterlyData());
-  const [viewTab, setViewTab] = useState('amount');
-
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
@@ -87,23 +85,32 @@ export default function QuarterlyTarget() {
   const [customerTypeFilter, setCustomerTypeFilter] = useState('all');
   const [customerFilter, setCustomerFilter] = useState('all');
 
-  const kpis = [
-    { label: '年度总目标', value: 23000000, prefix: '¥', format: true },
-    { label: '累计实际完成', value: 21100000, prefix: '¥', format: true },
-    { label: '总达成率', value: 91.7, suffix: '%', decimals: 1 },
-    { label: '待完成差额', value: 1900000, prefix: '¥', format: true },
-  ];
+  const kpis = useMemo(() => {
+    const annualSigningAmount = customerData.reduce(
+      (sum, row) => sum + row.annualTarget,
+      0
+    );
+    const annualShippingAmount = customerData.reduce(
+      (sum, row) => sum + row.q1Actual + row.q2Actual + row.q3Actual + row.q4Actual,
+      0
+    );
+    const completionRate =
+      annualSigningAmount > 0 ? (annualShippingAmount / annualSigningAmount) * 100 : 0;
+    const diffAmount = annualSigningAmount - annualShippingAmount;
 
-  const viewTabs = [
-    { key: 'amount', label: '金额视角' },
-    { key: 'rate', label: '完成率视角' },
-  ];
+    return [
+      { label: '年度总签约额', value: annualSigningAmount, prefix: '¥', format: true },
+      { label: '年度总出货额', value: annualShippingAmount, prefix: '¥', format: true },
+      { label: '总完成率', value: completionRate, suffix: '%', decimals: 1 },
+      { label: '总差额', value: diffAmount, prefix: '¥', format: true },
+    ];
+  }, [customerData]);
 
   const chartData = [
-    { quarter: 'Q1', targetAmount: 3450000, actualAmount: 4850000, targetRate: 15, actualRate: 21.1 },
-    { quarter: 'Q2', targetAmount: 9200000, actualAmount: 9970000, targetRate: 40, actualRate: 43.3 },
-    { quarter: 'Q3', targetAmount: 16100000, actualAmount: 16210000, targetRate: 70, actualRate: 70.5 },
-    { quarter: 'Q4', targetAmount: 23000000, actualAmount: 21100000, targetRate: 100, actualRate: 91.7 },
+    { quarter: 'Q1', targetAmount: 3450000, actualAmount: 4850000 },
+    { quarter: 'Q2', targetAmount: 9200000, actualAmount: 9970000 },
+    { quarter: 'Q3', targetAmount: 16100000, actualAmount: 16210000 },
+    { quarter: 'Q4', targetAmount: 23000000, actualAmount: 21100000 },
   ];
 
   const columns: Column<CustomerQuarterlyRow>[] = [
@@ -164,89 +171,11 @@ export default function QuarterlyTarget() {
 
   return (
     <div className="animate-fade-in">
-      {/* Filter Bar */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Select value={statYear} onValueChange={setStatYear}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="年份" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="2026">2026</SelectItem>
-              <SelectItem value="2025">2025</SelectItem>
-              <SelectItem value="2024">2024</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={deptFilter} onValueChange={setDeptFilter}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="选择部门" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部部门</SelectItem>
-              {DEPARTMENTS.map((dept) => (
-                <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={salespersonFilter} onValueChange={setSalespersonFilter}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="选择业务员" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部业务员</SelectItem>
-              {SALESPERSON_NAMES.map((name) => (
-                <SelectItem key={name} value={name}>{name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={customerTypeFilter} onValueChange={setCustomerTypeFilter}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="选择客户类型" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部客户类型</SelectItem>
-              {CUSTOMER_TYPE_OPTIONS.map((type) => (
-                <SelectItem key={type} value={type}>{type}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={customerFilter} onValueChange={setCustomerFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="选择客户" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部客户</SelectItem>
-              {CUSTOMER_NAMES.slice(0, 8).map((name) => (
-                <SelectItem key={name} value={name}>{name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <span className="text-caption text-text-tertiary">
-            每天19:00自动更新数据
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => toast.success('数据已更新', { description: '数据已更新至最新状态' })}
-            className="gap-1.5 text-body-small"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            手动更新数据
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleCancel}>
-            取消
-          </Button>
-          <Button size="sm" onClick={handleQuery}>
-            查询
-          </Button>
-        </div>
+      <div className="mb-4 flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900 shadow-sm">
+        <Info className="h-4 w-4 flex-shrink-0 text-primary" />
+        <span className="font-medium">
+          页面内的渠道商为当年在CRM中签订协议的渠道商清单
+        </span>
       </div>
 
       {/* KPI Cards */}
@@ -309,8 +238,7 @@ export default function QuarterlyTarget() {
       {/* Line Chart */}
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900">季度累计趋势</h3>
-          <TabSwitcher tabs={viewTabs} activeKey={viewTab} onChange={setViewTab} />
+          <h3 className="text-base font-semibold text-gray-900">季度累计金额趋势</h3>
         </div>
         <div style={{ width: '100%', minWidth: 400, height: 380 }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -320,35 +248,103 @@ export default function QuarterlyTarget() {
               <YAxis
                 width={65}
                 tick={{ fontSize: 11, fill: '#6B7280' }}
-                tickFormatter={(v: number) => viewTab === 'amount' ? `¥${(v / 10000).toFixed(0)}万` : `${v}%`}
-                domain={viewTab === 'rate' ? [0, 120] : [0, 25000000]}
+                tickFormatter={(v: number) => `¥${(v / 10000).toFixed(0)}万`}
+                domain={[0, 25000000]}
               />
               <Tooltip
                 contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 8, padding: 12 }}
-                formatter={(value: any, name: any) => {
-                  const labelMap: Record<string, string> = { targetAmount: '目标累计', actualAmount: '实际累计', targetRate: '目标完成率', actualRate: '实际完成率' };
-                  const isRate = viewTab === 'rate';
+                formatter={(value: unknown, name: unknown) => {
+                  const labelMap: Record<string, string> = { targetAmount: '目标累计金额', actualAmount: '实际累计金额' };
                   const num = Number(value);
-                  return [isRate ? `${num.toFixed(1)}%` : `¥${num.toLocaleString('zh-CN')}`, labelMap[name as string] || name];
+                  const key = String(name);
+                  return [`¥${num.toLocaleString('zh-CN')}`, labelMap[key] || key];
                 }}
               />
               <Legend formatter={(value) => {
-                const labelMap: Record<string, string> = { targetAmount: '目标累计', actualAmount: '实际累计', targetRate: '目标完成率', actualRate: '实际完成率' };
+                const labelMap: Record<string, string> = { targetAmount: '目标累计金额', actualAmount: '实际累计金额' };
                 return <span className="text-sm">{labelMap[value] || value}</span>;
               }} />
-              {viewTab === 'amount' ? (
-                <>
-                  <Line type="monotone" dataKey="targetAmount" stroke="#3B82F6" strokeWidth={2.5} strokeDasharray="8 4" dot={{ r: 5, fill: '#3B82F6', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} name="targetAmount" />
-                  <Line type="monotone" dataKey="actualAmount" stroke="#10B981" strokeWidth={2.5} dot={{ r: 5, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} name="actualAmount" />
-                </>
-              ) : (
-                <>
-                  <Line type="monotone" dataKey="targetRate" stroke="#3B82F6" strokeWidth={2.5} strokeDasharray="8 4" dot={{ r: 5, fill: '#3B82F6', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} name="targetRate" />
-                  <Line type="monotone" dataKey="actualRate" stroke="#10B981" strokeWidth={2.5} dot={{ r: 5, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} name="actualRate" />
-                </>
-              )}
+              <Line type="monotone" dataKey="targetAmount" stroke="#3B82F6" strokeWidth={2.5} strokeDasharray="8 4" dot={{ r: 5, fill: '#3B82F6', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} name="targetAmount" />
+              <Line type="monotone" dataKey="actualAmount" stroke="#10B981" strokeWidth={2.5} dot={{ r: 5, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 7 }} name="actualAmount" />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Filter Bar */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Select value={statYear} onValueChange={setStatYear}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="年份" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2026">2026</SelectItem>
+              <SelectItem value="2025">2025</SelectItem>
+              <SelectItem value="2024">2024</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={deptFilter} onValueChange={setDeptFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="选择部门" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部部门</SelectItem>
+              {SHIPPING_DEPARTMENTS.map((dept) => (
+                <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={salespersonFilter} onValueChange={setSalespersonFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="选择业务员" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部业务员</SelectItem>
+              {SALESPERSON_NAMES.map((name) => (
+                <SelectItem key={name} value={name}>{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={customerTypeFilter} onValueChange={setCustomerTypeFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="选择客户类型" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部客户类型</SelectItem>
+              {CUSTOMER_TYPE_OPTIONS.map((type) => (
+                <SelectItem key={type} value={type}>{type}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={customerFilter} onValueChange={setCustomerFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="选择客户" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部客户</SelectItem>
+              {CUSTOMER_NAMES.slice(0, 8).map((name) => (
+                <SelectItem key={name} value={name}>{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <span className="text-caption text-text-tertiary">
+            每天19:00自动更新数据
+          </span>
+          <UpdateDataDialog />
+          <Button variant="outline" size="sm" onClick={handleCancel}>
+            重置
+          </Button>
+          <Button size="sm" onClick={handleQuery}>
+            查询
+          </Button>
         </div>
       </div>
 

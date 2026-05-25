@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import CountUp from 'react-countup';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { Area, AreaChart, ResponsiveContainer } from 'recharts';
 import { TrendIndicator } from './TrendIndicator';
 import { cn } from '@/lib/utils';
 
@@ -56,10 +56,26 @@ export function KpiCard({
   const sparklineData = sparkline?.map((val, idx) => ({ value: val, idx })) ?? [];
 
   const formatNumber = (val: number): string => {
-    if (format) {
-      if (val >= 1000000) return (val / 1000000).toFixed(decimals) + 'M';
-      if (val >= 10000) return (val / 10000).toFixed(decimals) + '万';
+    const isCurrency = prefix === '¥' || prefix === '￥' || prefix === '楼';
+    if (isCurrency) {
+      const sign = val < 0 ? '-' : '';
+      return `${sign}￥${Math.abs(val).toLocaleString('zh-CN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
     }
+
+    if (suffix === '%') {
+      return `${val.toFixed(2)}%`;
+    }
+
+    if (format) {
+      return val.toLocaleString('zh-CN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
     return decimals > 0 ? val.toFixed(decimals) : val.toLocaleString('zh-CN');
   };
 
@@ -75,43 +91,45 @@ export function KpiCard({
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          {/* Label */}
-          <p className="text-label uppercase text-text-secondary tracking-wider mb-2">
+        <div className="min-w-0 flex-1">
+          <p className="mb-2 text-label uppercase tracking-wider text-text-secondary">
             {label}
           </p>
 
-          {/* Value */}
-          <div className="text-data-large text-text-primary mb-2">
+          <div className="mb-2 text-data-large text-text-primary">
             {inView ? (
               <CountUp
                 start={0}
                 end={value}
                 duration={1.5}
                 decimals={decimals}
-                prefix={prefix}
-                suffix={suffix}
-                formattingFn={(val) => `${prefix}${formatNumber(val)}${suffix}`}
+                formattingFn={(val) => formatNumber(val)}
                 onEnd={() => setCountFinished(true)}
               />
             ) : (
-              <span>{prefix}0{suffix}</span>
+              <span>{formatNumber(0)}</span>
             )}
           </div>
 
-          {/* Trend */}
           {trend !== undefined && <TrendIndicator trend={trend} comparison={comparison} />}
         </div>
 
-        {/* Sparkline */}
         {sparkline && sparkline.length > 0 && (
-          <div className="w-20 h-10 ml-4 flex-shrink-0">
+          <div className="ml-4 h-10 w-20 flex-shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={sparklineData}>
                 <defs>
                   <linearGradient id={`spark-${label}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={(trend ?? 0) >= 0 ? '#10B981' : '#EF4444'} stopOpacity={0.3} />
-                    <stop offset="100%" stopColor={(trend ?? 0) >= 0 ? '#10B981' : '#EF4444'} stopOpacity={0.05} />
+                    <stop
+                      offset="0%"
+                      stopColor={(trend ?? 0) >= 0 ? '#10B981' : '#EF4444'}
+                      stopOpacity={0.3}
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor={(trend ?? 0) >= 0 ? '#10B981' : '#EF4444'}
+                      stopOpacity={0.05}
+                    />
                   </linearGradient>
                 </defs>
                 <Area

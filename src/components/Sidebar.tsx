@@ -2,50 +2,12 @@ import { useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { cn } from '@/lib/utils';
 import {
-  FileText,
   Activity,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  type LucideIcon,
 } from 'lucide-react';
-
-interface NavItem {
-  key: string;
-  label: string;
-  icon: LucideIcon;
-  route?: string;
-  children?: { key: string; label: string; route: string; queryTab?: string }[];
-}
-
-const navItems: NavItem[] = [
-  {
-    key: 'sales-reports',
-    label: '销售报告管理',
-    icon: FileText,
-    route: '/report-center',
-  },
-  {
-    key: 'my-sales-reports',
-    label: '我的销售报告',
-    icon: FileText,
-    route: '/my-sales-reports',
-  },
-  {
-    key: 'report-query',
-    label: '报表查询',
-    icon: Activity,
-    route: '/realtime-reports',
-    children: [
-      { key: 'department', label: '部门出货统计', route: '/realtime-reports', queryTab: 'department' },
-      { key: 'salesperson-monthly', label: '业务出货统计', route: '/realtime-reports', queryTab: 'salesperson-monthly' },
-      { key: 'channel', label: '客户出货统计', route: '/realtime-reports', queryTab: 'channel' },
-      { key: 'target', label: '季度目标统计', route: '/realtime-reports', queryTab: 'target' },
-      { key: 'rebate', label: '返点测算', route: '/realtime-reports', queryTab: 'rebate' },
-      { key: 'config', label: '配置规则', route: '/realtime-reports', queryTab: 'config' },
-    ],
-  },
-];
+import { navItems } from './navigation';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -96,7 +58,7 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto custom-scrollbar py-3 px-2">
-        {navItems.map((item) => {
+        {navItems.filter((item) => !item.hidden).map((item) => {
           const active = isActive(item.route);
           const hasChildren = item.children && item.children.length > 0;
           const expanded = expandedGroups[item.key];
@@ -160,7 +122,7 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
               {/* Submenu */}
               {hasChildren && expanded && (
                 <div className="mt-0.5 ml-4 pl-3 border-l border-[#E5E7EB]">
-                  {item.children!.map((child) => {
+                  {item.children!.filter((child) => !child.hidden).map((child) => {
                     const childActive = currentPath === child.route && (!child.queryTab || searchParams.get('tab') === child.queryTab);
                     return (
                       <button
@@ -206,6 +168,3 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
     </aside>
   );
 }
-
-export { navItems };
-export type { NavItem };

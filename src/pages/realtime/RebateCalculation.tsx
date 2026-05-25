@@ -243,7 +243,7 @@ export default function RebateCalculationTab() {
                   onClick={() => setQCustomer('')}
                   className="h-8 px-3 text-[12px] border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6]"
                 >
-                  取消
+                  重置
                 </Button>
                 <Button
                   size="sm"
@@ -299,7 +299,7 @@ export default function RebateCalculationTab() {
                   onClick={() => setYCustomer('')}
                   className="h-8 px-3 text-[12px] border-[#E5E7EB] text-[#6B7280] hover:bg-[#F3F4F6]"
                 >
-                  取消
+                  重置
                 </Button>
                 <Button
                   size="sm"

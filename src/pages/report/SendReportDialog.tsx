@@ -140,7 +140,7 @@ export function SendReportDialog({ report, open, onClose }: SendReportDialogProp
 
         {/* Footer */}
         <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#F3F4F6]">
-          <Button variant="outline" onClick={onClose}>取消</Button>
+          <Button variant="outline" onClick={onClose}>重置</Button>
           <Button
             onClick={handleSend}
             disabled={sending || selectedCount === 0}

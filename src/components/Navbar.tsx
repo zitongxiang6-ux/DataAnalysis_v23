@@ -10,79 +10,10 @@ import {
   Settings,
   HelpCircle,
 } from 'lucide-react';
-import { navItems } from './Sidebar';
+import { getBreadcrumb } from './navigation';
 
 interface NavbarProps {
   className?: string;
-}
-
-function getBreadcrumb(pathname: string, searchParams: URLSearchParams): { label: string; route?: string }[] {
-  const segments: { label: string; route?: string }[] = [];
-
-  for (const item of navItems) {
-    if (item.route && pathname === item.route && !item.children) {
-      segments.push({ label: item.label, route: item.route });
-      return segments;
-    }
-    if (item.children) {
-      for (const child of item.children) {
-        const tabMatch = !child.queryTab || searchParams.get('tab') === child.queryTab;
-        if (pathname === child.route && tabMatch) {
-          segments.push({ label: item.label, route: item.route });
-          segments.push({ label: child.label, route: child.route + (child.queryTab ? `?tab=${child.queryTab}` : '') });
-          return segments;
-        }
-      }
-      if (pathname === item.route) {
-        segments.push({ label: item.label, route: item.route });
-        return segments;
-      }
-    }
-  }
-
-  const routeMap: Record<string, string> = {
-    '/report-center': '销售报告管理',
-    '/my-sales-reports': '我的销售报告',
-    '/weekly-report': '周报统计',
-    '/monthly-quarterly': '月报/季报',
-    '/channel-dealer': '渠道经销商',
-    '/quarterly-target': '季度目标追踪',
-    '/rebate-calculation': '返利计算',
-    '/realtime-reports': '报表查询',
-    '/top-customer': '大客户追踪',
-    '/rebate-review': '返点复核',
-  };
-
-  if (routeMap[pathname]) {
-    segments.push({ label: routeMap[pathname], route: pathname });
-  }
-
-  if (pathname.startsWith('/weekly-report/company/')) {
-    segments.push({ label: '销售报告管理', route: '/report-center' });
-    segments.push({ label: '公司级周报', route: pathname });
-  }
-
-  if (pathname.startsWith('/weekly-report/department/')) {
-    segments.push({ label: '销售报告管理', route: '/report-center' });
-    segments.push({ label: '部门级周报', route: pathname });
-  }
-
-  if (pathname.startsWith('/monthly-report/company/')) {
-    segments.push({ label: '销售报告管理', route: '/report-center' });
-    segments.push({ label: '公司级月报', route: pathname });
-  }
-
-  if (pathname.startsWith('/monthly-report/department/')) {
-    segments.push({ label: '销售报告管理', route: '/report-center' });
-    segments.push({ label: '部门级月报', route: pathname });
-  }
-
-  if (pathname.startsWith('/quarterly-report/department/')) {
-    segments.push({ label: '销售报告管理', route: '/report-center' });
-    segments.push({ label: '部门级季报', route: pathname });
-  }
-
-  return segments;
 }
 
 export function Navbar({ className }: NavbarProps) {
@@ -232,5 +163,3 @@ export function Navbar({ className }: NavbarProps) {
     </header>
   );
 }
-
-export { getBreadcrumb };

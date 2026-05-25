@@ -136,7 +136,7 @@ export function UpdateReportDialog({ report, open, onClose }: UpdateReportDialog
         <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#F3F4F6]">
           {!updating && !completed && (
             <>
-              <Button variant="outline" onClick={handleCancel}>取消</Button>
+              <Button variant="outline" onClick={handleCancel}>重置</Button>
               <Button onClick={handleStartUpdate} className="gap-1.5">
                 <RefreshCw className="w-4 h-4" />
                 开始更新

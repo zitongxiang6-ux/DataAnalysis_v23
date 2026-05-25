@@ -172,7 +172,7 @@ export default function ReviewPage() {
 
       {/* Cancel & Submit */}
       <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-[#E5E7EB]">
-        <Button variant="outline" onClick={() => navigate('/realtime-reports?tab=rebate')} className="w-[100px] text-[13px] border-[#E5E7EB] text-[#6B7280]">取消</Button>
+        <Button variant="outline" onClick={() => navigate('/realtime-reports?tab=rebate')} className="w-[100px] text-[13px] border-[#E5E7EB] text-[#6B7280]">重置</Button>
         <Button onClick={() => { toast.success('复核结果已提交'); navigate('/realtime-reports?tab=rebate'); }} className="w-[100px] text-[13px] bg-[#1A56DB] hover:bg-[#1E429F] text-white">提交</Button>
       </div>
     </Layout>

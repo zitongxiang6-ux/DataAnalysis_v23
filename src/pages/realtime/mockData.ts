@@ -92,14 +92,14 @@ export interface ChannelDealerRow {
   feb: number;
   mar: number;
   apr: number;
-  may?: number;
-  jun?: number;
-  jul?: number;
-  aug?: number;
-  sep?: number;
-  oct?: number;
-  nov?: number;
-  dec?: number;
+  may: number;
+  jun: number;
+  jul: number;
+  aug: number;
+  sep: number;
+  oct: number;
+  nov: number;
+  dec: number;
   totalJanApr: number;
   completionRate: number;
   yoyDiff: number;
@@ -107,29 +107,93 @@ export interface ChannelDealerRow {
 }
 
 export function getChannelDealerData(): ChannelDealerRow[] {
+  const multiOwnerRows = [
+    {
+      name: '广州科技',
+      department: '全球渠道部, 国内大客户部',
+      salesperson: '钟志华, 陆先斌',
+    },
+    {
+      name: '深圳光明',
+      department: '全球渠道部, 国际酒店部',
+      salesperson: '黄岸丹, 蒋其才',
+    },
+    {
+      name: '北京宏远',
+      department: '国内大客户部, 储能事业部',
+      salesperson: '黎达稳, 唐珂',
+    },
+    {
+      name: '成都华盛',
+      department: '储能事业部',
+      salesperson: '唐珂',
+    },
+    {
+      name: '天津滨海',
+      department: '储能事业部, 河东电子',
+      salesperson: '唐珂, 刘舒婷',
+    },
+  ];
+
+  const businessDepartments = [
+    '国内大客户部',
+    '全球渠道部',
+    '国际酒店部',
+    '储能事业部',
+    '河东电子',
+  ];
+
   return DEALER_NAMES.map((name, i) => {
-    const jan = +(Math.random() * 600000 - 100000).toFixed(2);
-    const feb = +(Math.random() * 600000 - 50000).toFixed(2);
-    const mar = +(Math.random() * 600000).toFixed(2);
-    const apr = +(Math.random() * 600000 - 30000).toFixed(2);
+    const multiOwner = multiOwnerRows.find((row) => row.name === name);
+    const monthlyValues = Array.from({ length: 12 }, (_, monthIndex) => {
+      const base = 52000 + i * 9200 + monthIndex * 11800;
+      const fluctuation = ((i + monthIndex) % 4) * 8600;
+      const returnOffset = (i + monthIndex) % 9 === 0 ? -42000 : 0;
+      return +(base + fluctuation + returnOffset).toFixed(2);
+    });
+    const [
+      jan,
+      feb,
+      mar,
+      apr,
+      may,
+      jun,
+      jul,
+      aug,
+      sep,
+      oct,
+      nov,
+      dec,
+    ] = monthlyValues;
     const totalJanApr = +(jan + feb + mar + apr).toFixed(2);
-    const target = Math.abs(totalJanApr) * (1.2 + Math.random() * 0.8);
-    const signingAmount = +(Math.abs(totalJanApr) * (1.05 + Math.random() * 0.45)).toFixed(2);
+    const annualShipping = monthlyValues.reduce((sum, value) => sum + value, 0);
+    const signingAmount = +(annualShipping * (1.12 + (i % 5) * 0.06)).toFixed(2);
+    const previousTotalJanApr = +(totalJanApr * (0.82 + (i % 6) * 0.05)).toFixed(2);
+    const yoyDiff = +(totalJanApr - previousTotalJanApr).toFixed(2);
+
     return {
       id: `CD${i + 1}`,
       name,
-      department: DEPARTMENTS[i % DEPARTMENTS.length],
-      salesperson: SALESPERSON_NAMES[i % SALESPERSON_NAMES.length],
+      department: multiOwner?.department ?? businessDepartments[i % businessDepartments.length],
+      salesperson: multiOwner?.salesperson ?? SALESPERSON_NAMES[i % SALESPERSON_NAMES.length],
       channelType: CUSTOMER_TYPES[i % CUSTOMER_TYPES.length],
       signingAmount,
       jan,
       feb,
       mar,
       apr,
+      may,
+      jun,
+      jul,
+      aug,
+      sep,
+      oct,
+      nov,
+      dec,
       totalJanApr,
-      completionRate: target > 0 ? +((totalJanApr / target) * 100).toFixed(2) : 0,
-      yoyDiff: +(Math.random() * 200000 - 100000).toFixed(2),
-      yoyGrowth: +(Math.random() * 200 - 100).toFixed(2),
+      completionRate: signingAmount > 0 ? +((annualShipping / signingAmount) * 100).toFixed(2) : 0,
+      yoyDiff,
+      yoyGrowth: previousTotalJanApr > 0 ? +((yoyDiff / previousTotalJanApr) * 100).toFixed(2) : 0,
     };
   });
 }
@@ -468,10 +532,13 @@ export function getCustomerQuarterlyData(): CustomerQuarterlyRow[] {
     { name: '招商蛇口', dept: '销售三部', type: 'ODM客户', sales: '吴静' },
     { name: '金地集团', dept: '渠道部', type: '国际渠道商', sales: '张三' },
     { name: '华夏幸福', dept: '销售一部', type: '国内重点渠道商', sales: '李华' },
+    { name: '北京宏远', dept: '储能事业部', type: '国际渠道商', sales: '唐珂' },
+    { name: '成都华盛', dept: '储能事业部', type: '国内重点渠道商', sales: '唐珂' },
+    { name: '天津滨海', dept: '河东电子', type: 'ODM客户', sales: '唐珂' },
   ];
 
   return customers.map((c) => {
-    const annualTarget = [2000000, 1800000, 1500000, 1600000, 1200000, 2200000, 1400000, 1000000, 900000, 1100000, 800000, 950000][customers.indexOf(c)];
+    const annualTarget = [2000000, 1800000, 1500000, 1600000, 1200000, 2200000, 1400000, 1000000, 900000, 1100000, 800000, 950000, 1680000, 1450000, 1320000][customers.indexOf(c)];
     const q1Target = Math.floor(annualTarget * 0.15);
     const q2Target = Math.floor(annualTarget * 0.25);
     const q3Target = Math.floor(annualTarget * 0.30);
@@ -542,7 +609,7 @@ function generateSalespersonData(
   const rand = seededRandom(`${dept}-${group}-${name}`);
   const annualTarget = Math.round(500000 + rand() * 1500000);
   const months: SalespersonMonthData[] = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 12; i++) {
     const monthRand = seededRandom(`${dept}-${group}-${name}-month-${i}`);
     const monthlyQuota = annualTarget / 12;
     const initialTarget = Math.round(monthlyQuota * (0.8 + monthRand() * 0.4));
@@ -559,7 +626,7 @@ function sumMonthData(
   monthsArray: SalespersonMonthData[][]
 ): SalespersonMonthData[] {
   const result: SalespersonMonthData[] = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 12; i++) {
     let initialTarget = 0;
     let actualTarget = 0;
     let actualOrder = 0;
@@ -666,6 +733,15 @@ export function getSalespersonMonthlyData(): {
         {
           name: '-',
           salespersons: ['唐珂', '刘舒婷', '许鹏飞', '待招人'],
+        },
+      ],
+    },
+    {
+      dept: '河东电子',
+      groups: [
+        {
+          name: '-',
+          salespersons: ['刘舒婷', '吴静', '唐珂', '许鹏飞'],
         },
       ],
     },

@@ -1,13 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { KpiCard } from '@/components/ui/KpiCard';
 import { SectionCard } from '@/components/ui/SectionCard';
-
-
 import {
-  deptShippingKpis,
-} from './mockData';
-
-import { Download, RefreshCw } from 'lucide-react';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { deptShippingKpis } from './mockData';
+import { CalendarDays, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -18,206 +20,10 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { DataUpdateNotice } from '@/components/DataUpdateNotice';
+import { UpdateDataDialog } from '@/components/UpdateDataDialog';
 
-interface TableRow {
-  id: string;
-  dept?: string;
-  deptRowSpan?: number;
-  deptTarget?: number;
-  targetRowSpan?: number;
-  group: string;
-  groupTarget: number;
-  jan: number;
-  feb: number;
-  mar: number;
-  apr: number;
-  may: number;
-  jun?: number;
-  jul?: number;
-  aug?: number;
-  sep?: number;
-  oct?: number;
-  nov?: number;
-  dec?: number;
-  completion: number;
-  rate: number;
-  yoyDiff: number;
-  yoyRate: number;
-  isSubtotal?: boolean;
-  isTotal?: boolean;
-}
-
-const tableRows: TableRow[] = [
-  // 全球渠道部
-  {
-    id: 'r1',
-    dept: '全球渠道部',
-    deptRowSpan: 4,
-    deptTarget: 4500000,
-    targetRowSpan: 4,
-    group: '分组 A',
-    groupTarget: 1500000,
-    jan: 120000,
-    feb: 135000,
-    mar: 158000,
-    apr: 142000,
-    may: 165000,
-    completion: 720000,
-    rate: 48.0,
-    yoyDiff: 85000,
-    yoyRate: 13.4,
-  },
-  {
-    id: 'r2',
-    group: '分组 B',
-    groupTarget: 1800000,
-    jan: 145000,
-    feb: 162000,
-    mar: 178000,
-    apr: 155000,
-    may: 188000,
-    completion: 828000,
-    rate: 46.0,
-    yoyDiff: 92000,
-    yoyRate: 12.5,
-  },
-  {
-    id: 'r3',
-    group: '分组 C',
-    groupTarget: 1200000,
-    jan: 98000,
-    feb: 112000,
-    mar: 125000,
-    apr: 108000,
-    may: 132000,
-    completion: 575000,
-    rate: 47.9,
-    yoyDiff: 48000,
-    yoyRate: 9.1,
-  },
-  {
-    id: 'r4',
-    group: '全球渠道部-小计',
-    groupTarget: 4500000,
-    jan: 363000,
-    feb: 409000,
-    mar: 461000,
-    apr: 405000,
-    may: 485000,
-    completion: 2123000,
-    rate: 47.2,
-    yoyDiff: 225000,
-    yoyRate: 11.9,
-    isSubtotal: true,
-  },
-  // 国内大客户部
-  {
-    id: 'r5',
-    dept: '国内大客户部',
-    deptRowSpan: 1,
-    deptTarget: 3200000,
-    targetRowSpan: 1,
-    group: '-',
-    groupTarget: 3200000,
-    jan: 280000,
-    feb: 310000,
-    mar: 295000,
-    apr: 325000,
-    may: 340000,
-    completion: 1550000,
-    rate: 48.4,
-    yoyDiff: 185000,
-    yoyRate: 13.6,
-  },
-  // 国际酒店部
-  {
-    id: 'r6',
-    dept: '国际酒店部',
-    deptRowSpan: 1,
-    deptTarget: 2800000,
-    targetRowSpan: 1,
-    group: '-',
-    groupTarget: 2800000,
-    jan: 220000,
-    feb: 245000,
-    mar: 268000,
-    apr: 240000,
-    may: 255000,
-    completion: 1228000,
-    rate: 43.9,
-    yoyDiff: 98000,
-    yoyRate: 8.7,
-  },
-  // 储能事业部
-  {
-    id: 'r7',
-    dept: '储能事业部',
-    deptRowSpan: 1,
-    deptTarget: 2500000,
-    targetRowSpan: 1,
-    group: '-',
-    groupTarget: 2500000,
-    jan: 195000,
-    feb: 210000,
-    mar: 225000,
-    apr: 218000,
-    may: 230000,
-    completion: 1078000,
-    rate: 43.1,
-    yoyDiff: 72000,
-    yoyRate: 7.2,
-  },
-  // 合计
-  {
-    id: 'r8',
-    dept: '合计',
-    deptRowSpan: 3,
-    deptTarget: 13000000,
-    targetRowSpan: 3,
-    group: '月度合计',
-    groupTarget: 0,
-    jan: 1058000,
-    feb: 1174000,
-    mar: 1249000,
-    apr: 1188000,
-    may: 1310000,
-    completion: 5979000,
-    rate: 46.0,
-    yoyDiff: 580000,
-    yoyRate: 10.8,
-    isTotal: true,
-  },
-  {
-    id: 'r9',
-    group: '季度合计',
-    groupTarget: 0,
-    jan: 0,
-    feb: 0,
-    mar: 3481000,
-    apr: 0,
-    may: 2498000,
-    completion: 5979000,
-    rate: 46.0,
-    yoyDiff: 580000,
-    yoyRate: 10.8,
-    isTotal: true,
-  },
-  {
-    id: 'r10',
-    group: '年度合计',
-    groupTarget: 0,
-    jan: 0,
-    feb: 0,
-    mar: 0,
-    apr: 0,
-    may: 0,
-    completion: 5979000,
-    rate: 46.0,
-    yoyDiff: 580000,
-    yoyRate: 10.8,
-    isTotal: true,
-  },
-];
+const SHOW_SUMMARY_KPIS = false;
 
 type MonthKey =
   | 'jan'
@@ -233,76 +39,458 @@ type MonthKey =
   | 'nov'
   | 'dec';
 
-const quarterGroups: { label: string; months: { key: MonthKey; label: string }[] }[] = [
+type MonthRecord = Record<MonthKey, number>;
+
+type StatKey =
+  | 'annualOrder'
+  | 'annualCompletionRate'
+  | 'cumulativeTarget'
+  | 'cumulativeOrder'
+  | 'cumulativeOrderRate'
+  | 'yoyDiff'
+  | 'yoyGrowthRate';
+
+interface SourceRow {
+  id: string;
+  department: string;
+  group: string;
+  area: string;
+  target: number;
+  monthlyOrders: MonthRecord;
+  previousCumulativeOrder?: number;
+  isTotal?: boolean;
+}
+
+interface TableRow extends SourceRow {
+  departmentRowSpan?: number;
+  groupRowSpan?: number;
+  annualOrder: number;
+  annualCompletionRate: number;
+  cumulativeTarget: number;
+  cumulativeOrder: number;
+  cumulativeOrderRate: number;
+  yoyDiff: number;
+  yoyGrowthRate: number;
+}
+
+const monthColumns: { key: MonthKey; label: string }[] = [
+  { key: 'jan', label: '1月' },
+  { key: 'feb', label: '2月' },
+  { key: 'mar', label: '3月' },
+  { key: 'apr', label: '4月' },
+  { key: 'may', label: '5月' },
+  { key: 'jun', label: '6月' },
+  { key: 'jul', label: '7月' },
+  { key: 'aug', label: '8月' },
+  { key: 'sep', label: '9月' },
+  { key: 'oct', label: '10月' },
+  { key: 'nov', label: '11月' },
+  { key: 'dec', label: '12月' },
+];
+
+const quarterGroups = [
+  { label: 'Q1', months: monthColumns.slice(0, 3) },
+  { label: 'Q2', months: monthColumns.slice(3, 6) },
+  { label: 'Q3', months: monthColumns.slice(6, 9) },
+  { label: 'Q4', months: monthColumns.slice(9, 12) },
+];
+
+const statColumns: { key: StatKey; label: string; className: string }[] = [
+  { key: 'annualOrder', label: '26年开单额', className: 'w-[120px] min-w-[120px]' },
+  { key: 'annualCompletionRate', label: '26年开单完成率', className: 'w-[160px] min-w-[160px]' },
+  { key: 'cumulativeTarget', label: '累计目标额（1-4月）', className: 'w-[160px] min-w-[160px]' },
+  { key: 'cumulativeOrder', label: '累计开单额（1-4月）', className: 'w-[160px] min-w-[160px]' },
+  { key: 'cumulativeOrderRate', label: '累计开单达成率（1-4月）', className: 'w-[170px] min-w-[170px]' },
+  { key: 'yoyDiff', label: '同比差额（1-4月）', className: 'w-[150px] min-w-[150px]' },
+  { key: 'yoyGrowthRate', label: '同比增长率（1-4月）', className: 'w-[150px] min-w-[150px]' },
+];
+
+const sourceRows: SourceRow[] = [
   {
-    label: 'Q1',
-    months: [
-      { key: 'jan', label: '1月' },
-      { key: 'feb', label: '2月' },
-      { key: 'mar', label: '3月' },
-    ],
+    id: 'global-international-maintain',
+    department: '全球渠道部',
+    group: '国际渠道组',
+    area: '维护组',
+    target: 1180000,
+    monthlyOrders: makeMonths([76000, 82000, 88000, 91000, 96000, 102000, 108000, 111000, 117000, 123000, 128000, 132000]),
   },
   {
-    label: 'Q2',
-    months: [
-      { key: 'apr', label: '4月' },
-      { key: 'may', label: '5月' },
-      { key: 'jun', label: '6月' },
-    ],
+    id: 'global-international-development',
+    department: '全球渠道部',
+    group: '国际渠道组',
+    area: '发展组',
+    target: 950000,
+    monthlyOrders: makeMonths([52000, 59000, 64000, 68000, 72000, 78000, 82000, 87000, 91000, 96000, 101000, 106000]),
   },
   {
-    label: 'Q3',
-    months: [
-      { key: 'jul', label: '7月' },
-      { key: 'aug', label: '8月' },
-      { key: 'sep', label: '9月' },
-    ],
+    id: 'global-international-expand',
+    department: '全球渠道部',
+    group: '国际渠道组',
+    area: '开拓组',
+    target: 1100000,
+    monthlyOrders: makeMonths([68000, 72000, 79000, 85000, 90000, 96000, 103000, 108000, 114000, 120000, 126000, 132000]),
   },
   {
-    label: 'Q4',
-    months: [
-      { key: 'oct', label: '10月' },
-      { key: 'nov', label: '11月' },
-      { key: 'dec', label: '12月' },
-    ],
+    id: 'global-domestic-maintain',
+    department: '全球渠道部',
+    group: '国内渠道组',
+    area: '维护组',
+    target: 1350000,
+    monthlyOrders: makeMonths([98000, 105000, 112000, 118000, 124000, 130000, 136000, 142000, 148000, 154000, 160000, 168000]),
+  },
+  {
+    id: 'global-domestic-expand',
+    department: '全球渠道部',
+    group: '国内渠道组',
+    area: '开拓组',
+    target: 1250000,
+    monthlyOrders: makeMonths([86000, 93000, 101000, 108000, 116000, 124000, 132000, 139000, 146000, 153000, 160000, 166000]),
+  },
+  {
+    id: 'global-domestic-real-estate',
+    department: '全球渠道部',
+    group: '国内渠道组',
+    area: '地产组',
+    target: 980000,
+    monthlyOrders: makeMonths([54000, 62000, 69000, 76000, 82000, 88000, 94000, 99000, 104000, 110000, 116000, 122000]),
+  },
+  {
+    id: 'global-odm-international',
+    department: '全球渠道部',
+    group: 'ODM组',
+    area: '国际ODM',
+    target: 860000,
+    monthlyOrders: makeMonths([45000, 52000, 59000, 63000, 70000, 76000, 83000, 89000, 95000, 101000, 107000, 113000]),
+  },
+  {
+    id: 'global-odm-domestic',
+    department: '全球渠道部',
+    group: 'ODM组',
+    area: '国内ODM',
+    target: 720000,
+    monthlyOrders: makeMonths([39000, 45000, 51000, 56000, 62000, 68000, 73000, 78000, 83000, 88000, 93000, 98000]),
+  },
+  {
+    id: 'domestic-key-account',
+    department: '国内大客户部',
+    group: '-',
+    area: '-',
+    target: 3200000,
+    monthlyOrders: makeMonths([280000, 310000, 295000, 325000, 340000, 360000, 375000, 390000, 405000, 420000, 435000, 455000]),
+  },
+  {
+    id: 'international-hotel',
+    department: '国际酒店部',
+    group: '-',
+    area: '-',
+    target: 2800000,
+    monthlyOrders: makeMonths([220000, 245000, 268000, 240000, 255000, 276000, 298000, 315000, 330000, 346000, 360000, 382000]),
+  },
+  {
+    id: 'energy-storage',
+    department: '储能事业部',
+    group: '-',
+    area: '-',
+    target: 2500000,
+    monthlyOrders: makeMonths([195000, 210000, 225000, 218000, 230000, 246000, 260000, 274000, 288000, 302000, 318000, 332000]),
+  },
+  {
+    id: 'hedong-electronics',
+    department: '河东电子',
+    group: '-',
+    area: '-',
+    target: 1600000,
+    monthlyOrders: makeMonths([118000, 126000, 135000, 142000, 150000, 160000, 172000, 181000, 190000, 202000, 214000, 226000]),
   },
 ];
 
-const fixedStatClass = {
-  completion: 'right-[410px] w-[130px] min-w-[130px]',
-  rate: 'right-[310px] w-[100px] min-w-[100px]',
-  yoyDiff: 'right-[160px] w-[150px] min-w-[150px]',
-  yoyRate: 'right-0 w-[160px] min-w-[160px]',
-} as const;
+const hierarchyFilterOptions = [
+  { value: 'all', label: '全部' },
+  ...Array.from(new Set(sourceRows.map((row) => row.department))).map((department) => ({
+    value: ['department', department].join('|'),
+    label: `部门：${department}`,
+  })),
+  ...Array.from(new Set(sourceRows.filter((row) => row.group !== '-').map((row) => `${row.department}|${row.group}`))).map((value) => {
+    const [department, group] = value.split('|');
+    return {
+      value: ['group', department, group].join('|'),
+      label: `分组：${department} / ${group}`,
+    };
+  }),
+  ...sourceRows.filter((row) => row.area !== '-').map((row) => ({
+    value: ['area', row.department, row.group, row.area].join('|'),
+    label: `区域：${row.department} / ${row.group} / ${row.area}`,
+  })),
+];
 
-const fixedHeaderClass =
-  'sticky z-30 px-4 py-3 text-right border-b border-l border-[#D8E5FF] bg-[#EEF4FF] text-[#1D4ED8]';
+const leftHeaderClass =
+  'border-b border-r border-[#D8DEE9] bg-[#F8FAFC] px-2 py-3 text-left font-semibold text-[#111827]';
+const leftBodyClass =
+  'border-b border-r border-[#E5E7EB] px-2 py-3 text-left';
+const statHeaderClass =
+  'border-b border-l border-[#E5E7EB] bg-[#F8FAFC] px-3 py-3 text-right font-semibold leading-tight text-[#374151] whitespace-normal';
+const statBodyClass =
+  'border-b border-l border-[#F3F4F6] bg-white px-3 py-3 text-right';
+const actionHeaderClass =
+  'sticky right-0 z-40 w-[124px] min-w-[124px] border-b border-l border-[#E5E7EB] bg-[#F8FAFC] px-3 py-3 text-center font-semibold text-[#374151] shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.55)]';
+const actionBodyClass =
+  'sticky right-0 z-30 w-[124px] min-w-[124px] border-b border-l border-[#E5E7EB] px-3 py-2 text-center shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.55)]';
 
-const fixedBodyClass =
-  'sticky z-20 px-4 py-3 text-right border-b border-l border-[#D8E5FF] shadow-[-12px_0_18px_-18px_rgba(30,64,175,0.55)]';
-
-function fmtCurrency(n: number) {
-  return `¥${n.toLocaleString('zh-CN')}`;
+function makeMonths(values: number[]): MonthRecord {
+  return monthColumns.reduce((months, month, index) => {
+    months[month.key] = values[index] ?? 0;
+    return months;
+  }, {} as MonthRecord);
 }
 
-function fmtPct(n: number) {
-  return `${n.toFixed(1)}%`;
+function sumMonths(rows: Pick<TableRow, 'monthlyOrders'>[]): MonthRecord {
+  return monthColumns.reduce((months, month) => {
+    months[month.key] = rows.reduce((sum, row) => sum + row.monthlyOrders[month.key], 0);
+    return months;
+  }, {} as MonthRecord);
 }
 
-function fmtMonthValue(row: TableRow, key: MonthKey) {
-  const value = row[key];
-  return value && value > 0 ? fmtCurrency(value) : '-';
+function toTableRow(row: SourceRow): TableRow {
+  const annualOrder = monthColumns.reduce((sum, month) => sum + row.monthlyOrders[month.key], 0);
+  const cumulativeOrder = sumFirstFourMonths(row.monthlyOrders);
+  const cumulativeTarget = Math.round((row.target / 12) * 4);
+  const previousCumulativeOrder = row.previousCumulativeOrder ?? Math.round(cumulativeOrder * 0.9);
+  const yoyDiff = cumulativeOrder - previousCumulativeOrder;
+
+  return {
+    ...row,
+    annualOrder,
+    annualCompletionRate: toPercent(annualOrder, row.target),
+    cumulativeTarget,
+    cumulativeOrder,
+    cumulativeOrderRate: toPercent(cumulativeOrder, cumulativeTarget),
+    yoyDiff,
+    yoyGrowthRate: toPercent(yoyDiff, previousCumulativeOrder),
+  };
 }
 
-function stickyCellBg(row: TableRow) {
-  if (row.isTotal) return 'bg-[#EAF1FF]';
-  if (row.isSubtotal) return 'bg-[#F3F7FF]';
-  return 'bg-[#F8FAFF]';
+function makeTotalRow(rows: TableRow[]): TableRow {
+  const target = rows.reduce((sum, row) => sum + row.target, 0);
+  const monthlyOrders = sumMonths(rows);
+  const previousCumulativeOrder = rows.reduce((sum, row) => sum + (row.cumulativeOrder - row.yoyDiff), 0);
+
+  return {
+    ...toTableRow({
+      id: 'total',
+      department: '合计',
+      group: '-',
+      area: '-',
+      target,
+      monthlyOrders,
+      previousCumulativeOrder,
+      isTotal: true,
+    }),
+    departmentRowSpan: 1,
+    groupRowSpan: 1,
+  };
+}
+
+function buildTableRows(rows: SourceRow[]) {
+  const detailRows = rows.map(toTableRow);
+  const rowSpanRows = detailRows.map((row, index) => {
+    const departmentFirstIndex = detailRows.findIndex((item) => item.department === row.department);
+    const groupFirstIndex = detailRows.findIndex(
+      (item) => item.department === row.department && item.group === row.group
+    );
+
+    return {
+      ...row,
+      departmentRowSpan:
+        index === departmentFirstIndex
+          ? detailRows.filter((item) => item.department === row.department).length
+          : undefined,
+      groupRowSpan:
+        index === groupFirstIndex
+          ? detailRows.filter((item) => item.department === row.department && item.group === row.group).length
+          : undefined,
+    };
+  });
+
+  return [makeTotalRow(detailRows), ...rowSpanRows];
+}
+
+function sumFirstFourMonths(months: MonthRecord) {
+  return months.jan + months.feb + months.mar + months.apr;
+}
+
+function toPercent(value: number, base: number) {
+  return base === 0 ? 0 : Number(((value / base) * 100).toFixed(2));
+}
+
+function fmtCurrency(value: number) {
+  const sign = value < 0 ? '-' : '';
+  return `${sign}￥${Math.abs(value).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function fmtPct(value: number) {
+  return `${value.toFixed(2)}%`;
+}
+
+function bodyBg(row: TableRow) {
+  return row.isTotal ? 'bg-[#EEF2FF] font-semibold' : 'bg-white';
+}
+
+function fixedBodyBg(row: TableRow, tone: 'left' | 'stat' = 'left') {
+  if (row.isTotal) return tone === 'stat' ? 'bg-[#EEF2FF] font-semibold' : 'bg-[#EEF2FF] font-semibold';
+  return tone === 'stat' ? 'bg-white' : 'bg-white';
+}
+
+function renderStat(row: TableRow, key: StatKey) {
+  switch (key) {
+    case 'annualOrder':
+      return fmtCurrency(row.annualOrder);
+    case 'annualCompletionRate':
+      return fmtPct(row.annualCompletionRate);
+    case 'cumulativeTarget':
+      return fmtCurrency(row.cumulativeTarget);
+    case 'cumulativeOrder':
+      return fmtCurrency(row.cumulativeOrder);
+    case 'cumulativeOrderRate':
+      return fmtPct(row.cumulativeOrderRate);
+    case 'yoyDiff':
+      return `${row.yoyDiff >= 0 ? '+' : ''}${fmtCurrency(row.yoyDiff)}`;
+    case 'yoyGrowthRate':
+      return `${row.yoyGrowthRate >= 0 ? '+' : ''}${fmtPct(row.yoyGrowthRate)}`;
+    default:
+      return '';
+  }
+}
+
+function statTone(row: TableRow, key: StatKey) {
+  if (key !== 'yoyDiff' && key !== 'yoyGrowthRate') return '';
+  return row[key] >= 0 ? 'text-[#059669]' : 'text-[#DC2626]';
+}
+
+function getRowContext(row: TableRow) {
+  return {
+    department: row.department || '-',
+    group: row.group || '-',
+    area: row.area || '-',
+  };
+}
+
+function filterSourceRows(rows: SourceRow[], filterValue: string) {
+  if (filterValue === 'all') return rows;
+
+  const [level, department, group, area] = filterValue.split('|');
+
+  if (level === 'department') {
+    return rows.filter((row) => row.department === department);
+  }
+
+  if (level === 'group') {
+    return rows.filter((row) => row.department === department && row.group === group);
+  }
+
+  if (level === 'area') {
+    return rows.filter(
+      (row) => row.department === department && row.group === group && row.area === area
+    );
+  }
+
+  return rows;
+}
+
+function MonthlyDetailDialog({
+  row,
+  onClose,
+}: {
+  row: TableRow | null;
+  onClose: () => void;
+}) {
+  const context = row ? getRowContext(row) : null;
+
+  return (
+    <Dialog open={Boolean(row)} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[86vh] max-w-[780px] overflow-hidden p-5">
+        {row && context && (
+          <>
+            <DialogHeader className="gap-1">
+              <DialogTitle>开单额明细</DialogTitle>
+              <DialogDescription>
+                {context.department} / {context.group} / {context.area}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid grid-cols-3 gap-3 rounded-md border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-[12px]">
+              <div>
+                <div className="text-text-tertiary">部门</div>
+                <div className="mt-1 font-semibold text-text-primary">{context.department}</div>
+              </div>
+              <div>
+                <div className="text-text-tertiary">分组</div>
+                <div className="mt-1 font-semibold text-text-primary">{context.group}</div>
+              </div>
+              <div>
+                <div className="text-text-tertiary">区域</div>
+                <div className="mt-1 font-semibold text-text-primary">{context.area}</div>
+              </div>
+            </div>
+
+            <div className="max-h-[58vh] overflow-y-auto rounded-md border border-[#E5E7EB]">
+              <table className="w-full border-collapse text-[12px]">
+                <thead>
+                  <tr className="bg-[#F8FAFC] text-[#374151]">
+                    <th className="sticky top-0 z-10 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-left font-semibold">季度</th>
+                    <th className="sticky top-0 z-10 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-left font-semibold">月份</th>
+                    <th className="sticky top-0 z-10 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">开单额</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {quarterGroups.flatMap((quarter) => [
+                    ...quarter.months.map((month, index) => (
+                      <tr key={month.key} className="hover:bg-[#F9FAFB]">
+                        {index === 0 && (
+                          <td
+                            rowSpan={quarter.months.length + 1}
+                            className="border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 align-middle font-semibold text-[#111827]"
+                          >
+                            {quarter.label}
+                          </td>
+                        )}
+                        <td className="border-b border-r border-[#F3F4F6] px-3 py-2">{month.label}</td>
+                        <td className="border-b border-[#F3F4F6] px-3 py-2 text-right font-medium">
+                          {fmtCurrency(row.monthlyOrders[month.key])}
+                        </td>
+                      </tr>
+                    )),
+                    <tr key={`${quarter.label}-total`} className="bg-[#F8FAFC] font-semibold">
+                      <td className="border-b border-r border-[#E5E7EB] px-3 py-2 text-right">
+                        季度小计
+                      </td>
+                      <td className="border-b border-[#E5E7EB] px-3 py-2 text-right">
+                        {fmtCurrency(
+                          quarter.months.reduce(
+                            (sum, month) => sum + row.monthlyOrders[month.key],
+                            0
+                          )
+                        )}
+                      </td>
+                    </tr>,
+                  ])}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export default function DepartmentShipping() {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [year, setYear] = useState('2026');
+  const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [monthlyDetailRow, setMonthlyDetailRow] = useState<TableRow | null>(null);
 
   const kpis = [
     { label: '年完成额', value: deptShippingKpis.totalShipping, prefix: '¥', format: true },
@@ -311,21 +499,28 @@ export default function DepartmentShipping() {
     { label: '1~4月同比增长率', value: deptShippingKpis.yoyComparison, suffix: '%', decimals: 1 },
   ];
 
+  const filteredSourceRows = useMemo(
+    () => filterSourceRows(sourceRows, departmentFilter),
+    [departmentFilter]
+  );
+
+  const tableRows = useMemo(() => buildTableRows(filteredSourceRows), [filteredSourceRows]);
+
   const allSelected = useMemo(
     () => tableRows.length > 0 && selectedKeys.size === tableRows.length,
-    [selectedKeys]
+    [selectedKeys, tableRows]
   );
 
   const someSelected = useMemo(
     () => selectedKeys.size > 0 && selectedKeys.size < tableRows.length,
-    [selectedKeys]
+    [selectedKeys, tableRows]
   );
 
   const toggleSelectAll = () => {
     if (allSelected) {
       setSelectedKeys(new Set());
     } else {
-      setSelectedKeys(new Set(tableRows.map((r) => r.id)));
+      setSelectedKeys(new Set(tableRows.map((row) => row.id)));
     }
   };
 
@@ -341,58 +536,90 @@ export default function DepartmentShipping() {
     });
   };
 
+  const handleDepartmentChange = (value: string) => {
+    setDepartmentFilter(value);
+    setSelectedKeys(new Set());
+    setMonthlyDetailRow(null);
+  };
+
+  const handleReset = () => {
+    setYear('2026');
+    setDepartmentFilter('all');
+    setSelectedKeys(new Set());
+    setMonthlyDetailRow(null);
+  };
+
+  const handleQuery = () => {
+    toast.success('查询完成', { description: '已按当前筛选条件刷新列表' });
+  };
+
   return (
     <div className="animate-fade-in">
-      {/* Filter Bar */}
-      <div className="flex items-center justify-between mb-6">
-        <Select value={year} onValueChange={setYear}>
-          <SelectTrigger className="w-[120px] h-9">
-            <SelectValue placeholder="年份" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="2026">2026年</SelectItem>
-            <SelectItem value="2025">2025年</SelectItem>
-            <SelectItem value="2024">2024年</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Select value={year} onValueChange={setYear}>
+            <SelectTrigger className="h-9 w-[120px]">
+              <SelectValue placeholder="年份" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2026">2026年</SelectItem>
+              <SelectItem value="2025">2025年</SelectItem>
+              <SelectItem value="2024">2024年</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={departmentFilter} onValueChange={handleDepartmentChange}>
+            <SelectTrigger className="h-9 w-[280px]">
+              <SelectValue placeholder="部门" />
+            </SelectTrigger>
+            <SelectContent>
+              {hierarchyFilterOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <div className="flex items-center gap-4">
           <span className="text-caption text-text-tertiary">
             每天19:00自动更新数据
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => toast.success('数据已更新', { description: '数据已更新至最新状态' })}
-            className="gap-1.5 text-body-small"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            手动更新数据
+          <UpdateDataDialog />
+          <Button variant="outline" size="sm" onClick={handleReset}>
+            重置
+          </Button>
+          <Button size="sm" onClick={handleQuery}>
+            查询
           </Button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        {kpis.map((kpi, i) => (
-          <KpiCard
-            key={kpi.label}
-            label={kpi.label}
-            value={kpi.value}
-            prefix={kpi.prefix || ''}
-            suffix={kpi.suffix || ''}
-            decimals={kpi.decimals || 0}
-            format={kpi.format || false}
+      {SHOW_SUMMARY_KPIS && (
+        <div className="mb-6 grid grid-cols-4 gap-4">
+          {kpis.map((kpi, index) => (
+            <KpiCard
+              key={kpi.label}
+              label={kpi.label}
+              value={kpi.value}
+              prefix={kpi.prefix || ''}
+              suffix={kpi.suffix || ''}
+              decimals={kpi.decimals || 0}
+              format={kpi.format || false}
+              delay={index * 100}
+            />
+          ))}
+        </div>
+      )}
 
-            delay={i * 100}
-          />
-        ))}
-      </div>
+      <DataUpdateNotice
+        dailyFields="年开单额、年开单完成率、月开单额"
+        monthlyFields="累计开单额、累计开单达成率、同比差额、同比增长率"
+      />
 
-      {/* Department Table */}
       <SectionCard>
-        {/* Toolbar */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <span className="text-caption text-text-secondary">
             已选 <span className="font-semibold text-primary">{selectedKeys.size}</span> 条
           </span>
@@ -401,17 +628,16 @@ export default function DepartmentShipping() {
             size="sm"
             onClick={() => toast.info('导出功能开发中')}
           >
-            <Download className="w-4 h-4 mr-1" />
+            <Download className="mr-1 h-4 w-4" />
             导出
           </Button>
         </div>
 
-        {/* Custom HTML Table */}
-        <div className="overflow-x-auto">
-          <table className="w-max min-w-full border-collapse">
+        <div className="relative overflow-x-auto rounded-md border border-[#E5E7EB]">
+          <table className="w-max min-w-full border-collapse text-[12px]">
             <thead>
-              <tr className="bg-[#F9FAFB] text-[#374151] text-xs font-semibold">
-                <th rowSpan={2} className="px-4 py-3 text-left border-b border-[#F3F4F6] w-10 min-w-10">
+              <tr>
+                <th className={cn(leftHeaderClass, 'w-[40px] min-w-[40px] text-center')}>
                   <input
                     type="checkbox"
                     className="cursor-pointer"
@@ -422,57 +648,30 @@ export default function DepartmentShipping() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th rowSpan={2} className="px-4 py-3 text-left border-b border-[#F3F4F6] min-w-[130px]">部门</th>
-                <th rowSpan={2} className="px-4 py-3 text-right border-b border-[#F3F4F6] min-w-[120px]">部门目标额</th>
-                <th rowSpan={2} className="px-4 py-3 text-left border-b border-[#F3F4F6] min-w-[120px]">分组</th>
-                <th rowSpan={2} className="px-4 py-3 text-right border-b border-[#F3F4F6] min-w-[130px]">分组目标额</th>
-                {quarterGroups.map((quarter) => (
-                  <th
-                    key={quarter.label}
-                    colSpan={quarter.months.length}
-                    className="px-4 py-3 text-center border-b border-[#F3F4F6] bg-[#F8FAFC] text-[#475569] min-w-[300px]"
-                  >
-                    {quarter.label}
+                <th className={cn(leftHeaderClass, 'w-[96px] min-w-[96px]')}>
+                  部门
+                </th>
+                <th className={cn(leftHeaderClass, 'w-[100px] min-w-[100px]')}>
+                  分组
+                </th>
+                <th className={cn(leftHeaderClass, 'w-[90px] min-w-[90px]')}>
+                  区域
+                </th>
+                <th className={cn(leftHeaderClass, 'w-[110px] min-w-[110px] text-right')}>
+                  保底目标额
+                </th>
+                {statColumns.map((column) => (
+                  <th key={column.key} className={cn(statHeaderClass, column.className)}>
+                    {column.label}
                   </th>
                 ))}
-                <th rowSpan={2} className={cn(fixedHeaderClass, fixedStatClass.completion)}>
-                  年完成额
-                </th>
-                <th rowSpan={2} className={cn(fixedHeaderClass, fixedStatClass.rate)}>
-                  完成率
-                </th>
-                <th rowSpan={2} className={cn(fixedHeaderClass, fixedStatClass.yoyDiff)}>
-                  1~4月同比差额
-                </th>
-                <th rowSpan={2} className={cn(fixedHeaderClass, fixedStatClass.yoyRate)}>
-                  1~4月同比增长率
-                </th>
-              </tr>
-              <tr className="bg-[#F9FAFB] text-[#374151] text-xs font-semibold">
-                {quarterGroups.flatMap((quarter) =>
-                  quarter.months.map((month) => (
-                    <th
-                      key={month.key}
-                      className="px-4 py-3 text-right border-b border-[#F3F4F6] min-w-[100px]"
-                    >
-                      {month.label}
-                    </th>
-                  ))
-                )}
+                <th className={actionHeaderClass}>操作</th>
               </tr>
             </thead>
-            <tbody className="text-[13px]">
+            <tbody>
               {tableRows.map((row) => (
-                <tr
-                  key={row.id}
-                  className={cn(
-                    'border-b border-[#F3F4F6]',
-                    row.isTotal && 'bg-[#F3F4F6] font-bold',
-                    row.isSubtotal && 'bg-gray-50 font-semibold',
-                    !row.isTotal && !row.isSubtotal && 'hover:bg-[#F9FAFB]'
-                  )}
-                >
-                  <td className="px-4 py-3 border-b border-[#F3F4F6]">
+                <tr key={row.id} className={cn(bodyBg(row), !row.isTotal && 'hover:bg-[#F9FAFB]')}>
+                  <td className={cn(leftBodyClass, fixedBodyBg(row), 'w-[40px] min-w-[40px] text-center')}>
                     <input
                       type="checkbox"
                       className="cursor-pointer"
@@ -480,105 +679,71 @@ export default function DepartmentShipping() {
                       onChange={() => toggleSelectRow(row.id)}
                     />
                   </td>
-                  {row.dept && (
+                  {row.departmentRowSpan !== undefined && (
                     <td
-                      rowSpan={row.deptRowSpan}
-                      className="px-4 py-3 border-b border-[#F3F4F6] font-medium text-left align-middle"
+                      rowSpan={row.departmentRowSpan}
+                      className={cn(
+                        leftBodyClass,
+                        fixedBodyBg(row),
+                        'w-[96px] min-w-[96px] align-middle font-semibold text-[#111827]'
+                      )}
                     >
-                      {row.dept}
+                      {row.department}
                     </td>
                   )}
-                  {row.deptTarget !== undefined && (
+                  {row.groupRowSpan !== undefined && (
                     <td
-                      rowSpan={row.targetRowSpan}
-                      className="px-4 py-3 border-b border-[#F3F4F6] text-right align-middle"
+                      rowSpan={row.groupRowSpan}
+                      className={cn(
+                        leftBodyClass,
+                        fixedBodyBg(row),
+                        'w-[100px] min-w-[100px] align-middle font-semibold text-[#111827]'
+                      )}
                     >
-                      {fmtCurrency(row.deptTarget)}
+                      {row.group}
                     </td>
                   )}
-                  <td
-                    className={cn(
-                      'px-4 py-3 border-b border-[#F3F4F6] text-left',
-                      (row.isSubtotal || row.isTotal) && 'font-semibold'
-                    )}
-                  >
-                    {row.group}
+                  <td className={cn(leftBodyClass, fixedBodyBg(row), 'w-[90px] min-w-[90px] text-[#111827]')}>
+                    {row.area}
                   </td>
-                  <td
-                    className={cn(
-                      'px-4 py-3 border-b border-[#F3F4F6] text-right',
-                      (row.isSubtotal || row.isTotal) && 'font-semibold'
-                    )}
-                  >
-                    {row.groupTarget > 0 ? fmtCurrency(row.groupTarget) : '-'}
+                  <td className={cn(leftBodyClass, fixedBodyBg(row), 'w-[110px] min-w-[110px] text-right')}>
+                    {fmtCurrency(row.target)}
                   </td>
-                  {quarterGroups.flatMap((quarter) =>
-                    quarter.months.map((month) => (
-                      <td
-                        key={`${row.id}-${month.key}`}
-                        className={cn(
-                          'px-4 py-3 border-b border-[#F3F4F6] text-right min-w-[100px]',
-                          (row.isSubtotal || row.isTotal) && 'font-semibold',
-                          !row[month.key] && 'text-text-tertiary'
-                        )}
-                      >
-                        {fmtMonthValue(row, month.key)}
-                      </td>
-                    ))
-                  )}
-                  <td
-                    className={cn(
-                      fixedBodyClass,
-                      fixedStatClass.completion,
-                      stickyCellBg(row),
-                      (row.isSubtotal || row.isTotal) && 'font-semibold'
-                    )}
-                  >
-                    {fmtCurrency(row.completion)}
+                  {statColumns.map((column) => (
+                    <td
+                      key={`${row.id}-${column.key}`}
+                      className={cn(
+                        statBodyClass,
+                        column.className,
+                        fixedBodyBg(row, 'stat'),
+                        statTone(row, column.key)
+                      )}
+                    >
+                      {renderStat(row, column.key)}
+                    </td>
+                  ))}
+                  <td className={cn(actionBodyClass, fixedBodyBg(row))}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMonthlyDetailRow(row)}
+                      className="h-7 gap-1.5 px-2 text-[12px]"
+                    >
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      开单额明细
+                    </Button>
                   </td>
-                  <td
-                    className={cn(
-                      fixedBodyClass,
-                      fixedStatClass.rate,
-                      stickyCellBg(row),
-                      (row.isSubtotal || row.isTotal) && 'font-semibold'
-                    )}
-                  >
-                    {fmtPct(row.rate)}
-                  </td>
-                  <td
-                    className={cn(
-                      fixedBodyClass,
-                      fixedStatClass.yoyDiff,
-                      stickyCellBg(row),
-                      row.yoyDiff >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]',
-                      (row.isSubtotal || row.isTotal) && 'font-semibold'
-                    )}
-                  >
-                    {row.yoyDiff >= 0 ? '+' : ''}
-                    {fmtCurrency(row.yoyDiff)}
-                  </td>
-                  <td
-                    className={cn(
-                      fixedBodyClass,
-                      fixedStatClass.yoyRate,
-                      stickyCellBg(row),
-                      row.yoyRate >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]',
-                      (row.isSubtotal || row.isTotal) && 'font-semibold'
-                    )}
-                  >
-                    {row.yoyRate >= 0 ? '+' : ''}
-                    {fmtPct(row.yoyRate)}
-                  </td>
-
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-
-
       </SectionCard>
+
+      <MonthlyDetailDialog
+        row={monthlyDetailRow}
+        onClose={() => setMonthlyDetailRow(null)}
+      />
     </div>
   );
 }
