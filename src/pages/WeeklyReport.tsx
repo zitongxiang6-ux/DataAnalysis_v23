@@ -137,9 +137,9 @@ function SalespersonDrawer({
         {/* Drawer Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#F3F4F6]">
           <div>
-            <h2 className="text-h3 text-text-primary">业务员出货明细</h2>
+            <h2 className="text-h3 text-text-primary">业务员开单明细</h2>
             <p className="text-caption text-text-secondary mt-0.5">
-              {salesperson.name} - 客户级别出货数据
+              {salesperson.name} - 客户级别开单数据
             </p>
           </div>
           <button
@@ -167,7 +167,7 @@ function SalespersonDrawer({
               </div>
               <div className="flex items-center gap-6 mt-1.5">
                 <span className="text-caption text-text-secondary">
-                  出货额:{' '}
+                  开单额:{' '}
                   <span className="font-semibold text-text-primary">
                     ¥{formatWan(salesperson.shippingAmount)}万
                   </span>
@@ -189,7 +189,7 @@ function SalespersonDrawer({
 
         {/* Customer Table */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-          <h3 className="text-h3 text-text-primary mb-4">客户出货数据</h3>
+          <h3 className="text-h3 text-text-primary mb-4">客户开单数据</h3>
           <div className="border border-[#E5E7EB] rounded-card overflow-hidden">
             <Table>
               <TableHeader>
@@ -198,7 +198,7 @@ function SalespersonDrawer({
                     客户名称
                   </TableHead>
                   <TableHead className="text-table-header uppercase tracking-wider text-text-secondary px-3 text-right">
-                    出货额
+                    开单额
                   </TableHead>
                   <TableHead className="text-table-header uppercase tracking-wider text-text-secondary px-3 text-center">
                     签约完成率
@@ -313,9 +313,9 @@ export default function WeeklyReport() {
     <div className="space-y-6">
       {/* ====== Page Header ====== */}
       <div className="border-b border-[#E5E7EB] pb-5">
-        <h1 className="text-h1 text-text-primary">部门业务出货统计（周报）</h1>
+        <h1 className="text-h1 text-text-primary">部门业务开单统计（周报）</h1>
         <p className="text-body-small text-text-secondary mt-1">
-          按部门及业务员维度统计本周出货数据
+          按部门及业务员维度统计本周开单数据
         </p>
       </div>
 
@@ -359,7 +359,7 @@ export default function WeeklyReport() {
       {/* ====== KPI Cards ====== */}
       <div className="grid grid-cols-4 gap-4">
         <KpiCard
-          label="本周出货总额"
+          label="本周开单总额"
           value={kpiData.totalShipping}
           prefix="¥"
           suffix=""
@@ -402,7 +402,7 @@ export default function WeeklyReport() {
       </div>
 
       {/* ====== Trend Chart ====== */}
-      <ChartSection title="本周出货趋势">
+      <ChartSection title="本周开单趋势">
         <div className="h-[360px]">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={trendData} barCategoryGap="20%">
@@ -439,7 +439,7 @@ export default function WeeklyReport() {
               <Bar
                 yAxisId="bar"
                 dataKey="dailyAmount"
-                name="日出货额"
+                name="日开单额"
                 fill="#3B82F6"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={40}
@@ -461,7 +461,7 @@ export default function WeeklyReport() {
 
       {/* ====== Department Shipping Data Table ====== */}
       <SectionCard
-        title="部门出货明细"
+        title="部门开单明细"
         titleAction={
           <div className="flex items-center gap-2">
             <span className="text-caption text-text-secondary">
@@ -488,7 +488,7 @@ export default function WeeklyReport() {
                   部门名称
                 </TableHead>
                 <TableHead className="text-table-header uppercase tracking-wider text-text-secondary px-3 text-right">
-                  出货额
+                  开单额
                 </TableHead>
                 <TableHead className="text-table-header uppercase tracking-wider text-text-secondary px-3 text-right">
                   目标额

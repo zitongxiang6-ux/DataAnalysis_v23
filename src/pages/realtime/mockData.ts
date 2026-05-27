@@ -495,7 +495,7 @@ export interface DepartmentRule {
 export function getDepartmentRules(): DepartmentRule[] {
   return [
     { id: 'DR1', deptName: '销售一部', defaultStatMethod: '按签约归属', customRule: '大客户订单归大客户部', effectiveTime: '2026-01-01' },
-    { id: 'DR2', deptName: '销售二部', defaultStatMethod: '按出货归属', customRule: '无', effectiveTime: '2026-01-01' },
+    { id: 'DR2', deptName: '销售二部', defaultStatMethod: '按开单归属', customRule: '无', effectiveTime: '2026-01-01' },
     { id: 'DR3', deptName: '渠道部', defaultStatMethod: '按签约归属', customRule: '渠道订单100%归属', effectiveTime: '2026-03-01' },
     { id: 'DR4', deptName: '大客户部', defaultStatMethod: '按客户归属', customRule: 'VIP客户优先分配', effectiveTime: '2026-02-15' },
   ];

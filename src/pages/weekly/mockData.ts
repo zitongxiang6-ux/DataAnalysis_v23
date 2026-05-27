@@ -12,7 +12,7 @@ export const kpiData: KpiData = {
   openOrderTrend: 5.2,
 };
 
-// ============ Trend Chart Data (本周出货趋势) ============
+// ============ Trend Chart Data (本周开单趋势) ============
 export const trendData: TrendDataPoint[] = [
   { day: '周一', dayShort: '一', dailyAmount: 320, cumulativeAmount: 320 },
   { day: '周二', dayShort: '二', dailyAmount: 480, cumulativeAmount: 800 },

@@ -34,7 +34,6 @@ import {
 import { Info, Target, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { UpdateDataDialog } from '@/components/UpdateDataDialog';
 
 const CUSTOMER_TYPE_OPTIONS = [
   '国际渠道商',
@@ -46,6 +45,13 @@ const CUSTOMER_TYPE_OPTIONS = [
   '国内地产客户',
 ];
 
+function formatYuan(value: number) {
+  return `￥${value.toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
 function QuarterCell({ actual, target }: { actual: number; target: number }) {
   const rate = target > 0 ? (actual / target) * 100 : 0;
   const diff = target - actual;
@@ -53,13 +59,13 @@ function QuarterCell({ actual, target }: { actual: number; target: number }) {
   return (
     <div className="space-y-0.5 py-1">
       <div className="text-[11px] leading-tight text-text-secondary">
-        目标 ¥{(target / 10000).toFixed(0)}万
+        目标 {formatYuan(target)}
       </div>
       <div className="text-[11px] leading-tight text-text-secondary">
-        完成 ¥{(actual / 10000).toFixed(0)}万
+        完成 {formatYuan(actual)}
       </div>
       <div className={diff > 0 ? 'text-[11px] leading-tight text-danger' : 'text-[11px] leading-tight text-success'}>
-        {diff > 0 ? `缺口¥${(diff / 10000).toFixed(0)}万` : `超额¥${(Math.abs(diff) / 10000).toFixed(0)}万`}
+        {diff > 0 ? `缺口${formatYuan(diff)}` : `超额${formatYuan(Math.abs(diff))}`}
       </div>
       <div className={rate >= 100 ? 'text-[11px] leading-tight text-success font-semibold' : 'text-[11px] leading-tight text-danger font-semibold'}>
         {rate.toFixed(1)}%
@@ -74,8 +80,6 @@ function QuarterCell({ actual, target }: { actual: number; target: number }) {
 export default function QuarterlyTarget() {
   const [quarterData] = useState(getQuarterlyData());
   const [customerData] = useState(getCustomerQuarterlyData());
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
   // Filter states
@@ -100,7 +104,7 @@ export default function QuarterlyTarget() {
 
     return [
       { label: '年度总签约额', value: annualSigningAmount, prefix: '¥', format: true },
-      { label: '年度总出货额', value: annualShippingAmount, prefix: '¥', format: true },
+      { label: '年度总开单额', value: annualShippingAmount, prefix: '¥', format: true },
       { label: '总完成率', value: completionRate, suffix: '%', decimals: 1 },
       { label: '总差额', value: diffAmount, prefix: '¥', format: true },
     ];
@@ -144,17 +148,8 @@ export default function QuarterlyTarget() {
     },
   ];
 
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return customerData.slice(start, start + pageSize);
-  }, [customerData, page, pageSize]);
-
   const handleExport = () => {
-    if (selectedKeys.size === 0) {
-      toast.info('请先勾选要导出的数据');
-      return;
-    }
-    toast.success('导出成功', { description: `已导出 ${selectedKeys.size} 条数据` });
+    toast.success('导出成功', { description: `已一次性导出 ${customerData.length} 条数据` });
   };
 
   const handleQuery = () => {
@@ -174,7 +169,7 @@ export default function QuarterlyTarget() {
       <div className="mb-4 flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900 shadow-sm">
         <Info className="h-4 w-4 flex-shrink-0 text-primary" />
         <span className="font-medium">
-          页面内的渠道商为当年在CRM中签订协议的渠道商清单
+          页面内的渠道商为当年在CRM中签订协议的国内渠道商清单
         </span>
       </div>
 
@@ -238,7 +233,7 @@ export default function QuarterlyTarget() {
       {/* Line Chart */}
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900">季度累计金额趋势</h3>
+            <h3 className="text-base font-semibold text-gray-900">签约渠道商季度目标统计</h3>
         </div>
         <div style={{ width: '100%', minWidth: 400, height: 380 }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -338,7 +333,6 @@ export default function QuarterlyTarget() {
           <span className="text-caption text-text-tertiary">
             每天19:00自动更新数据
           </span>
-          <UpdateDataDialog />
           <Button variant="outline" size="sm" onClick={handleCancel}>
             重置
           </Button>
@@ -349,10 +343,10 @@ export default function QuarterlyTarget() {
       </div>
 
       {/* Customer Quarterly Table */}
-      <SectionCard title="客户季度完成情况">
+      <SectionCard title="签约渠道商季度目标统计">
         <DataTable
           columns={columns}
-          data={paginatedData}
+          data={customerData}
           rowKey={(row) => row.customerName}
           selection={{
             selectedKeys,
@@ -370,13 +364,6 @@ export default function QuarterlyTarget() {
               导出
             </Button>
           }
-          pagination={{
-            page,
-            pageSize,
-            total: customerData.length,
-            onPageChange: setPage,
-            onPageSizeChange: setPageSize,
-          }}
         />
       </SectionCard>
     </div>

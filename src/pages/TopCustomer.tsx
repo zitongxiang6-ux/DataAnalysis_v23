@@ -133,7 +133,7 @@ export default function TopCustomer() {
       <div className="mb-6">
         <h1 className="text-h1 text-text-primary">TOP客户追踪</h1>
         <p className="text-body-small text-text-secondary mt-1">
-          按出货额排名前30客户及排名变化追踪
+          按开单额排名前30客户及排名变化追踪
         </p>
       </div>
 
@@ -205,7 +205,7 @@ export default function TopCustomer() {
                 <th className="px-3 py-3 text-left text-table-header text-text-secondary uppercase">排名变化</th>
                 <th className="px-3 py-3 text-left text-table-header text-text-secondary uppercase">客户名称</th>
                 <th className="px-3 py-3 text-left text-table-header text-text-secondary uppercase">客户类型</th>
-                <th className="px-3 py-3 text-right text-table-header text-text-secondary uppercase">出货额</th>
+                <th className="px-3 py-3 text-right text-table-header text-text-secondary uppercase">开单额</th>
                 <th className="px-3 py-3 text-right text-table-header text-text-secondary uppercase">占比</th>
                 <th className="px-3 py-3 text-right text-table-header text-text-secondary uppercase">订单数</th>
                 <th className="px-3 py-3 text-right text-table-header text-text-secondary uppercase">平均订单额</th>
@@ -289,7 +289,7 @@ export default function TopCustomer() {
               <XAxis type="number" tickFormatter={(v) => `¥${(v / 10000).toFixed(0)}万`} style={{ fontSize: 12, fill: '#6B7280' }} />
               <YAxis type="category" dataKey="name" width={100} style={{ fontSize: 12, fill: '#1F2937' }} />
               <Tooltip
-                formatter={((value: number) => [`¥${value.toLocaleString('zh-CN')}`, '出货额']) as any}
+                formatter={((value: number) => [`¥${value.toLocaleString('zh-CN')}`, '开单额']) as any}
                 contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13 }}
               />
               <Bar dataKey="revenue" radius={[0, 4, 4, 0]} barSize={24}>

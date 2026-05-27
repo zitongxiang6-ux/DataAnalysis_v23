@@ -18,8 +18,8 @@ function DealerTable({ rows, periodLabel }: { rows: KeyChannelDealerRow[]; perio
         <thead>
           <tr className="bg-slate-50 text-[12px] font-semibold text-slate-600">
             <th className="px-4 py-3 text-left">渠道商名称</th>
-            <th className="px-4 py-3 text-right">本{periodLabel}出货额</th>
-            <th className="px-4 py-3 text-right">上{periodLabel}出货额</th>
+            <th className="px-4 py-3 text-right">本{periodLabel}开单额</th>
+            <th className="px-4 py-3 text-right">上{periodLabel}开单额</th>
             <th className="px-4 py-3 text-right">环比</th>
             <th className="px-4 py-3 text-right">去年同期</th>
             <th className="px-4 py-3 text-right">同比</th>
@@ -67,8 +67,8 @@ export default function KeyChannelDealerDetails() {
               <ArrowLeft className="h-4 w-4" />
               {isQuarterly ? '返回公司级季报' : '返回公司级月报'}
             </Button>
-            <h1 className="text-[24px] font-bold text-slate-900">重点渠道商出货明细</h1>
-            <p className="mt-1 text-[13px] text-slate-500">按国内、国际重点渠道商查看本{periodLabel}出货表现与同比/环比变化。</p>
+            <h1 className="text-[24px] font-bold text-slate-900">重点渠道商开单明细</h1>
+            <p className="mt-1 text-[13px] text-slate-500">按国内、国际重点渠道商查看本{periodLabel}开单表现与同比/环比变化。</p>
           </div>
         </div>
 

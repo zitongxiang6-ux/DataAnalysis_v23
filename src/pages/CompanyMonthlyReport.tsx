@@ -33,22 +33,22 @@ import { domesticChannelQuarterRows } from './report/domesticChannelQuarterData'
 import type { Report } from './report/types';
 
 const kpis = [
-  { label: '本月出货额', value: '¥1.25亿', sub: '目标 ¥1.10亿', changes: ['同比 +18.2%', '环比 +12.5%'], color: 'border-t-blue-600' },
+  { label: '本月开单额', value: '¥1.25亿', sub: '目标 ¥1.10亿', changes: ['同比 +18.2%', '环比 +12.5%'], color: 'border-t-blue-600' },
   { label: '未结束订单金额', value: '¥5,680万', sub: '共 42 笔订单', changes: ['同比 -3.2%', '环比 -5.2%'], color: 'border-t-amber-600', down: true },
   { label: '年完成额', value: '¥5.28亿', sub: '年度目标 ¥12亿', changes: ['进度正常'], color: 'border-t-teal-600' },
   { label: '年完成率', value: '44.0%', sub: '时间进度 41.7%', changes: [], color: 'border-t-rose-600' },
 ];
 
 const monthlyCompare = [
-  { name: '总出货额', 本月: 12500, 上月: 11110, 去年同期: 10570 },
-  { name: '国内出货', 本月: 7825, 上月: 7100, 去年同期: 6756 },
-  { name: '国际出货', 本月: 4675, 上月: 4010, 去年同期: 3814 },
+  { name: '总开单额', 本月: 12500, 上月: 11110, 去年同期: 10570 },
+  { name: '国内开单', 本月: 7825, 上月: 7100, 去年同期: 6756 },
+  { name: '国际开单', 本月: 4675, 上月: 4010, 去年同期: 3814 },
 ];
 
 const deptTrend = [
-  { name: '全球渠道部', 本月出货: 6701, 去年同期: 5590, 同比增幅: 19.9 },
-  { name: '国内大客户部', 本月出货: 2479, 去年同期: 2224, 同比增幅: 11.5 },
-  { name: '国际酒店部', 本月出货: 2320, 去年同期: 1895, 同比增幅: 22.4 },
+  { name: '全球渠道部', 本月开单: 6701, 去年同期: 5590, 同比增幅: 19.9 },
+  { name: '国内大客户部', 本月开单: 2479, 去年同期: 2224, 同比增幅: 11.5 },
+  { name: '国际酒店部', 本月开单: 2320, 去年同期: 1895, 同比增幅: 22.4 },
 ];
 
 const customerTypes = [
@@ -62,8 +62,8 @@ const customerTypes = [
 ];
 
 const keyDealerShipCompare = [
-  { name: '国内重点渠道商', 本月出货: 5005, 上月出货: 4568, 去年同期: 4233, 同比增长: 18.2 },
-  { name: '国际重点渠道商', 本月出货: 3045, 上月出货: 2526, 去年同期: 2390, 同比增长: 27.4 },
+  { name: '国内重点渠道商', 本月开单: 5005, 上月开单: 4568, 去年同期: 4233, 同比增长: 18.2 },
+  { name: '国际重点渠道商', 本月开单: 3045, 上月开单: 2526, 去年同期: 2390, 同比增长: 27.4 },
 ];
 
 const quarterProgress = [
@@ -215,22 +215,22 @@ export default function CompanyMonthlyReport() {
           <SummaryBox>
             <div className="space-y-3">
               <p className="indent-8">
-                从整体经营看，本月公司出货总额为 <Highlight>¥1.25亿</Highlight>，达成月度目标 <Highlight>113.6%</Highlight>，同比去年同月 <TrendText value={18.2} />，环比上月 <TrendText value={12.5} />，整体出货节奏好于上月，也明显好于去年同期。其中，国内出货 <Highlight>¥7,825万</Highlight>，国际出货 <Highlight>¥4,675万</Highlight>，国际业务同比 <TrendText value={22.4} />、环比 <TrendText value={16.8} />，增速高于国内，说明海外订单承接和交付节奏更活跃。
+                从整体经营看，本月公司开单总额为 <Highlight>¥1.25亿</Highlight>，达成月度目标 <Highlight>113.6%</Highlight>，同比去年同月 <TrendText value={18.2} />，环比上月 <TrendText value={12.5} />，整体开单节奏好于上月，也明显好于去年同期。其中，国内开单 <Highlight>¥7,825万</Highlight>，国际开单 <Highlight>¥4,675万</Highlight>，国际业务同比 <TrendText value={22.4} />、环比 <TrendText value={16.8} />，增速高于国内，说明海外订单承接和交付节奏更活跃。
               </p>
               <p className="indent-8">
-                从部门贡献看，<Highlight>全球渠道部</Highlight>出货 <Highlight>¥6,701万</Highlight>，占公司总出货额 <Highlight>53.6%</Highlight>，是本月最核心的贡献部门；国内大客户部 <Highlight>¥2,479万</Highlight>、国际酒店部 <Highlight>¥2,320万</Highlight>形成第二梯队。全球渠道部贡献规模最大，国际酒店部同比增速更突出，国内大客户部规模稳定但增速偏低，需要继续提升重点项目验收和复购转化。
+                从部门贡献看，<Highlight>全球渠道部</Highlight>开单 <Highlight>¥6,701万</Highlight>，占公司总开单额 <Highlight>53.6%</Highlight>，是本月最核心的贡献部门；国内大客户部 <Highlight>¥2,479万</Highlight>、国际酒店部 <Highlight>¥2,320万</Highlight>形成第二梯队。全球渠道部贡献规模最大，国际酒店部同比增速更突出，国内大客户部规模稳定但增速偏低，需要继续提升重点项目验收和复购转化。
               </p>
               <p className="indent-8">
                 从客户结构看，深圳华强科技、上海新联电子、新加坡 AsiaTech 等头部客户继续贡献主要增量，TOP3 集中度提升，说明头部客户复购和项目推进仍是增长的主要支撑。尾部客户中，东莞精密制造、成都西部电子、武汉光谷科技等进度偏慢，客户贡献不均衡的问题仍需关注，避免头部客户稳定但尾部客户持续流失。
               </p>
               <p className="indent-8">
-                从交付风险看，未结束订单 <Highlight>¥5,680万</Highlight>（42笔），环比上月下降 <TrendText value={-5.2} />，结单效率持续改善；但超 72 小时未结订单仍有 8 笔，合计 <Highlight>¥1,856万</Highlight>。其中深圳华强科技金额最高、等待时间较长，尾部客户和进度偏慢客户需明确责任人、预计结单时间和跨部门协同事项，避免滚动到下月影响出货。
+                从交付风险看，未结束订单 <Highlight>¥5,680万</Highlight>（42笔），环比上月下降 <TrendText value={-5.2} />，结单效率持续改善；但超 72 小时未结订单仍有 8 笔，合计 <Highlight>¥1,856万</Highlight>。其中深圳华强科技金额最高、等待时间较长，尾部客户和进度偏慢客户需明确责任人、预计结单时间和跨部门协同事项，避免滚动到下月影响开单。
               </p>
               <WarningText>重点关注：下月建议继续放大国际酒店部和全球渠道部的增长势能，同时对国内大客户部、尾部客户和超 72 小时未结订单建立专项跟进清单；对低增长部门和尾部客户按周复盘，保证月初订单承接和月底交付节奏同步改善。</WarningText>
             </div>
           </SummaryBox>
           <div className="grid grid-cols-1 gap-6 px-6 pb-6 lg:grid-cols-2">
-            <ChartBlock title="出货额对比（本月 / 上月 / 去年同期）" summary="小结：本月总出货、国内出货、国际出货均高于上月和去年同期，说明公司整体需求处于扩张状态。" bubble={<><div className="font-semibold text-slate-700">总出货额</div><div className="text-blue-600">本月：¥12,500万</div><div className="text-sky-500">上月：¥11,110万</div><div className="text-slate-400">去年同期：¥10,570万</div></>}>
+            <ChartBlock title="开单额对比（本月 / 上月 / 去年同期）" summary="小结：本月总开单、国内开单、国际开单均高于上月和去年同期，说明公司整体需求处于扩张状态。" bubble={<><div className="font-semibold text-slate-700">总开单额</div><div className="text-blue-600">本月：¥12,500万</div><div className="text-sky-500">上月：¥11,110万</div><div className="text-slate-400">去年同期：¥10,570万</div></>}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyCompare}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -244,7 +244,7 @@ export default function CompanyMonthlyReport() {
                 </BarChart>
               </ResponsiveContainer>
             </ChartBlock>
-            <ChartBlock title="各部门出货额及占比" summary="小结：全球渠道部贡献最高，国际酒店部同比增幅最大，国内大客户部仍有进一步提升空间。" bubble={<><div className="font-semibold text-slate-700">全球渠道部</div><div className="text-blue-600">本月出货：¥6,701万</div><div className="text-sky-500">去年同期：¥5,590万</div><div className="text-amber-500">同比增幅：19.9%</div></>}>
+            <ChartBlock title="各部门开单额及占比" summary="小结：全球渠道部贡献最高，国际酒店部同比增幅最大，国内大客户部仍有进一步提升空间。" bubble={<><div className="font-semibold text-slate-700">全球渠道部</div><div className="text-blue-600">本月开单：¥6,701万</div><div className="text-sky-500">去年同期：¥5,590万</div><div className="text-amber-500">同比增幅：19.9%</div></>}>
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={deptTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -253,7 +253,7 @@ export default function CompanyMonthlyReport() {
                   <YAxis yAxisId="rate" orientation="right" tick={{ fontSize: 12, fill: '#94A3B8' }} tickFormatter={(value) => `${value}%`} tickLine={false} axisLine={false} />
                   <Tooltip formatter={(value, name) => [name === '同比增幅' ? percentTooltip(value) : amountTooltip(value), name]} />
                   <Legend />
-                  <Bar yAxisId="amount" dataKey="本月出货" fill="#2563EB" radius={[5, 5, 0, 0]} />
+                  <Bar yAxisId="amount" dataKey="本月开单" fill="#2563EB" radius={[5, 5, 0, 0]} />
                   <Bar yAxisId="amount" dataKey="去年同期" fill="#93C5FD" radius={[5, 5, 0, 0]} />
                   <Line yAxisId="rate" dataKey="同比增幅" stroke="#F59E0B" strokeWidth={2.5} />
                 </ComposedChart>
@@ -268,15 +268,15 @@ export default function CompanyMonthlyReport() {
             <div className="flex min-h-[420px] flex-col justify-between rounded-xl border border-slate-200 bg-slate-50 px-5 py-5">
               <div className="space-y-4 text-[14px] leading-8 text-slate-700">
                 <p>
-                  本月国内、国际重点渠道商合计出货 <Highlight>¥8,050万</Highlight>，占公司本月出货额约 <Highlight>64.4%</Highlight>，是拉动月度出货的核心渠道盘。其中国内重点渠道商出货 <Highlight>¥5,005万</Highlight>，环比提升 9.6%，同比 <TrendText value={18.2} />，贡献规模更大，主要由深圳华强科技、上海新联电子、北京中科创新支撑。
+                  本月国内、国际重点渠道商合计开单 <Highlight>¥8,050万</Highlight>，占公司本月开单额约 <Highlight>64.4%</Highlight>，是拉动月度开单的核心渠道盘。其中国内重点渠道商开单 <Highlight>¥5,005万</Highlight>，环比提升 9.6%，同比 <TrendText value={18.2} />，贡献规模更大，主要由深圳华强科技、上海新联电子、北京中科创新支撑。
                 </p>
                 <p>
-                  国际重点渠道商本月出货 <Highlight>¥3,045万</Highlight>，环比提升 20.5%，同比 <TrendText value={27.4} />，增速明显高于国内，说明海外重点渠道的订单承接能力正在增强。从出货能力看，国内渠道商胜在规模和稳定供给，国际渠道商胜在增速和新增空间；后续应保持国内头部渠道商稳定复购，同时把新加坡 AsiaTech、迪拜 GulfBuild 等国际渠道商作为下半年增量重点。
+                  国际重点渠道商本月开单 <Highlight>¥3,045万</Highlight>，环比提升 20.5%，同比 <TrendText value={27.4} />，增速明显高于国内，说明海外重点渠道的订单承接能力正在增强。从开单能力看，国内渠道商胜在规模和稳定供给，国际渠道商胜在增速和新增空间；后续应保持国内头部渠道商稳定复购，同时把新加坡 AsiaTech、迪拜 GulfBuild 等国际渠道商作为下半年增量重点。
                 </p>
               </div>
-              <WarningText>重点关注：国际重点渠道商增速更好，但客户数量和交付链路仍相对集中，建议锁定 TOP3 国际渠道商的下半年订单排期；国内重点渠道商需关注中腰部客户是否跟上头部节奏，避免出货过度集中在少数渠道。</WarningText>
+              <WarningText>重点关注：国际重点渠道商增速更好，但客户数量和交付链路仍相对集中，建议锁定 TOP3 国际渠道商的下半年订单排期；国内重点渠道商需关注中腰部客户是否跟上头部节奏，避免开单过度集中在少数渠道。</WarningText>
             </div>
-            <ChartBlock title="国内/国际重点渠道商出货能力对比" summary="小结：国内重点渠道商贡献规模更高，国际重点渠道商同比增速更快，二者分别承担基本盘和增量盘。">
+            <ChartBlock title="国内/国际重点渠道商开单能力对比" summary="小结：国内重点渠道商贡献规模更高，国际重点渠道商同比增速更快，二者分别承担基本盘和增量盘。">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={keyDealerShipCompare}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -285,8 +285,8 @@ export default function CompanyMonthlyReport() {
                   <YAxis yAxisId="rate" orientation="right" tick={{ fontSize: 12, fill: '#94A3B8' }} tickFormatter={(value) => `${value}%`} tickLine={false} axisLine={false} />
                   <Tooltip formatter={(value, name) => [name === '同比增长' ? percentTooltip(value) : amountTooltip(value), name]} />
                   <Legend />
-                  <Bar yAxisId="amount" dataKey="本月出货" fill="#2563EB" radius={[5, 5, 0, 0]} />
-                  <Bar yAxisId="amount" dataKey="上月出货" fill="#60A5FA" radius={[5, 5, 0, 0]} />
+                  <Bar yAxisId="amount" dataKey="本月开单" fill="#2563EB" radius={[5, 5, 0, 0]} />
+                  <Bar yAxisId="amount" dataKey="上月开单" fill="#60A5FA" radius={[5, 5, 0, 0]} />
                   <Bar yAxisId="amount" dataKey="去年同期" fill="#CBD5E1" radius={[5, 5, 0, 0]} />
                   <Line yAxisId="rate" dataKey="同比增长" stroke="#F59E0B" strokeWidth={2.5} />
                 </ComposedChart>
@@ -304,9 +304,9 @@ export default function CompanyMonthlyReport() {
         <Card>
           <SectionHeader index={4} title="国内渠道商季度目标进展与返点测算" />
           <SummaryBox>
-            本年度国内渠道商季度目标分解为：<Highlight>Q1: 15%</Highlight>、<Highlight>Q2: 25%</Highlight>、<Highlight>Q3: 30%</Highlight>、<Highlight>Q4: 30%</Highlight>（季度单独比率，不累计）。当前为 Q2（4-6月），季度目标出货额为 <Highlight>¥3.0亿</Highlight>，目前已完成 <Highlight>¥2.45亿</Highlight>，季度完成率 <Highlight>81.7%</Highlight>，距季度结束还有 <Highlight>42天</Highlight>，剩余缺口 <Highlight>¥5,500万</Highlight>。
+            本年度国内渠道商季度目标分解为：<Highlight>Q1: 15%</Highlight>、<Highlight>Q2: 25%</Highlight>、<Highlight>Q3: 30%</Highlight>、<Highlight>Q4: 30%</Highlight>（季度单独比率，不累计）。当前为 Q2（4-6月），季度目标开单额为 <Highlight>¥3.0亿</Highlight>，目前已完成 <Highlight>¥2.45亿</Highlight>，季度完成率 <Highlight>81.7%</Highlight>，距季度结束还有 <Highlight>42天</Highlight>，剩余缺口 <Highlight>¥5,500万</Highlight>。
             <br />
-            从渠道商达成情况看，深圳华强科技、上海新联电子、北京中科创新已提前达成 Q2 目标，形成主要贡献；杭州智联网络、广州恒通科技处于冲刺区间，仍需推动重点项目尽快验收出货；成都西部电子当前完成率 84.4%，存在跨期风险，需要销售与交付协同跟进。
+            从渠道商达成情况看，深圳华强科技、上海新联电子、北京中科创新已提前达成 Q2 目标，形成主要贡献；杭州智联网络、广州恒通科技处于冲刺区间，仍需推动重点项目尽快验收开单；成都西部电子当前完成率 84.4%，存在跨期风险，需要销售与交付协同跟进。
           </SummaryBox>
           <div className="px-6 pb-4">
             <ChartBlock title="Q1-Q4 季度目标完成进度" summary="小结：Q1 已接近完成，Q2 当前完成率 81.7%，需要在剩余周期继续推进渠道商冲刺。" bubble={<><div className="font-semibold text-slate-700">Q2</div><div className="text-blue-600">目标：¥3.0亿</div><div className="text-blue-600">已完成：¥2.45亿</div><div className="text-amber-500">完成率：81.7%</div></>}>
@@ -337,15 +337,15 @@ export default function CompanyMonthlyReport() {
         </Card>
 
         <Card>
-          <SectionHeader index={5} title="各类型客户出货分析" />
+          <SectionHeader index={5} title="各类型客户开单分析" />
           <SummaryBox>
-            国内渠道商仍是出货主力，合计出货 <Highlight>¥7,825万</Highlight>，占比 <Highlight>62.6%</Highlight>，同比保持双位数增长，说明核心渠道盘基本稳定。ODM客户本月出货 <Highlight>¥2,450万</Highlight>，同比增长 <TrendText value={28.5} />，增速显著领先其他类型，是本月最值得继续加码的增长来源。
+            国内渠道商仍是开单主力，合计开单 <Highlight>¥7,825万</Highlight>，占比 <Highlight>62.6%</Highlight>，同比保持双位数增长，说明核心渠道盘基本稳定。ODM客户本月开单 <Highlight>¥2,450万</Highlight>，同比增长 <TrendText value={28.5} />，增速显著领先其他类型，是本月最值得继续加码的增长来源。
             <br />
-            国内地产客户出货 <Highlight>¥1,680万</Highlight>，环比仅增长 5.1%，增速偏温和，后续需要关注重点项目复购和回款节奏；国际发展组客户出货 <Highlight>¥1,295万</Highlight>，同比增长 24.3%，虽然规模小于渠道商和 ODM，但增长质量较好，可作为海外新增客户培育池持续跟进。
+            国内地产客户开单 <Highlight>¥1,680万</Highlight>，环比仅增长 5.1%，增速偏温和，后续需要关注重点项目复购和回款节奏；国际发展组客户开单 <Highlight>¥1,295万</Highlight>，同比增长 24.3%，虽然规模小于渠道商和 ODM，但增长质量较好，可作为海外新增客户培育池持续跟进。
           </SummaryBox>
           <div className="grid grid-cols-1 gap-6 px-6 pb-4 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <ChartBlock title="国内地产客户 vs ODM客户出货对比" summary="小结：ODM客户增长斜率明显高于国内地产客户，是本月最具弹性的客户类型。" bubble={<><div className="font-semibold text-slate-700">ODM客户</div><div className="text-blue-600">本月：¥2,450万</div><div className="text-sky-500">上月：¥2,020万</div><div className="text-slate-400">去年同期：¥1,906万</div></>}>
+              <ChartBlock title="国内地产客户 vs ODM客户开单对比" summary="小结：ODM客户增长斜率明显高于国内地产客户，是本月最具弹性的客户类型。" bubble={<><div className="font-semibold text-slate-700">ODM客户</div><div className="text-blue-600">本月：¥2,450万</div><div className="text-sky-500">上月：¥2,020万</div><div className="text-slate-400">去年同期：¥1,906万</div></>}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={customerTypeCompare}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -361,25 +361,25 @@ export default function CompanyMonthlyReport() {
               </ChartBlock>
             </div>
             <ChartBlock title="客户类型占比" summary="小结：国内渠道商占比最高，ODM 与国际发展组客户构成第二增长曲线。">
-              <PieChartBlock data={customerTypes} bubble="出货额：¥5,480万" />
+              <PieChartBlock data={customerTypes} bubble="开单额：¥5,480万" />
             </ChartBlock>
           </div>
           <div className="px-6 pb-6">
-            <ReportTable title="各类型客户出货汇总">
-              <thead><tr><th>客户类型</th><th className="text-right">本月出货额</th><th className="text-right">上月出货额</th><th className="text-right">环比</th><th className="text-right">去年同期</th><th className="text-right">同比</th><th className="text-right">本年累计</th><th className="text-center">趋势</th></tr></thead>
+            <ReportTable title="各类型客户开单汇总">
+              <thead><tr><th>客户类型</th><th className="text-right">本月开单额</th><th className="text-right">上月开单额</th><th className="text-right">环比</th><th className="text-right">去年同期</th><th className="text-right">同比</th><th className="text-right">本年累计</th><th className="text-center">趋势</th></tr></thead>
               <tbody>{typeSummaryRows.map((row) => <tr key={row.type}><td className="font-semibold">{row.type}</td><td className="text-right font-semibold">{row.amount}</td><td className="text-right">{row.prev}</td><td className="text-right"><TrendText value={row.mom} /></td><td className="text-right">{row.last}</td><td className="text-right"><TrendText value={row.yoy} /></td><td className="text-right">{row.total}</td><td className="text-center text-emerald-600">{row.trend}</td></tr>)}</tbody>
             </ReportTable>
           </div>
         </Card>
 
         <Card>
-          <SectionHeader index={6} title="2025年前30客户 & 2026年出货情况" />
+          <SectionHeader index={6} title="2025年前30客户 & 2026年开单情况" />
           <SummaryBox>
-            2025 年 TOP30 客户全年合计贡献 <Highlight>¥10.85亿</Highlight>，2026 年 1-5 月这些客户累计出货 <Highlight>¥4.12亿</Highlight>，整体达到去年全年贡献的约 38.0%，略低于时间进度但客户集中度有所提升。
+            2025 年 TOP30 客户全年合计贡献 <Highlight>¥10.85亿</Highlight>，2026 年 1-5 月这些客户累计开单 <Highlight>¥4.12亿</Highlight>，整体达到去年全年贡献的约 38.0%，略低于时间进度但客户集中度有所提升。
             国内客户仍承担主要规模贡献，深圳华强科技、上海新联电子、北京中科创新等头部客户进度稳定，国内合计客户数更多、基本盘更厚；国际客户数量较少但增速更优，新加坡 AsiaTech、印度 MumbaiTech、迪拜 GulfBuild 的进度和同比表现更突出，说明海外重点客户的承接能力正在增强。
             <br />
             从当前质量看，国际客户整体更好，平均进度和同比增速都高于国内，但规模仍依赖国内客户。国内侧重点是稳住头部渠道商并修复东莞精密制造、成都西部电子、武汉光谷科技等慢进度客户；国际侧建议继续加码重点渠道商和发展组客户，把高增速转化为下半年锁单。
-            <WarningText>客户流失预警：国内客户中的东莞精密制造 2026 年至今仅出货 ¥185万，前 5 月进度仅 6.9%，建议销售总监安排拜访了解原因；国际客户虽然整体表现更好，但仍需关注交付稳定性和汇率、跨境物流对订单兑现的影响。</WarningText>
+            <WarningText>客户流失预警：国内客户中的东莞精密制造 2026 年至今仅开单 ¥185万，前 5 月进度仅 6.9%，建议销售总监安排拜访了解原因；国际客户虽然整体表现更好，但仍需关注交付稳定性和汇率、跨境物流对订单兑现的影响。</WarningText>
           </SummaryBox>
           <div className="px-6 pb-6">
             <div className="mb-4 inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1">
@@ -398,8 +398,8 @@ export default function CompanyMonthlyReport() {
                 国际客户
               </button>
             </div>
-            <ReportTable title={`${annualScope === 'domestic' ? '国内' : '国际'}2025年出货额前30客户明细及2026年进展`} fullHeight tag={<><Tag tone="green">正常 ≥40%</Tag><Tag tone="amber">关注 35%-40%</Tag><Tag tone="red">预警 &lt;35%</Tag></>}>
-              <thead><tr><th>2025排名</th><th>客户名称</th><th className="text-center">客户类型</th><th className="text-center">国内/国际</th><th className="text-right">2025年全年出货</th><th className="text-right">2026年至今</th><th className="text-right">同比去年1-5月</th><th className="text-right">时间进度占比</th><th className="text-center">状态</th></tr></thead>
+            <ReportTable title={`${annualScope === 'domestic' ? '国内' : '国际'}2025年开单额前30客户明细及2026年进展`} fullHeight tag={<><Tag tone="green">正常 ≥40%</Tag><Tag tone="amber">关注 35%-40%</Tag><Tag tone="red">预警 &lt;35%</Tag></>}>
+              <thead><tr><th>2025排名</th><th>客户名称</th><th className="text-center">客户类型</th><th className="text-center">国内/国际</th><th className="text-right">2025年全年开单</th><th className="text-right">2026年至今</th><th className="text-right">同比去年1-5月</th><th className="text-right">时间进度占比</th><th className="text-center">状态</th></tr></thead>
               <tbody>{annualScopeRows.map((row) => <tr key={row.name} className={row.status === '预警' ? 'bg-red-50' : row.status === '关注' ? 'bg-amber-50' : 'bg-emerald-50'}><td><span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${rankClass(row.rank)}`}>{row.rank}</span></td><td className="font-semibold">{row.name}</td><td className="text-center"><Tag tone={row.region === '国际' ? 'green' : 'blue'}>{row.type}</Tag></td><td className="text-center">{row.region}</td><td className="text-right">{row.lastYear}</td><td className="text-right font-semibold">{row.current}</td><td className="text-right"><TrendText value={row.yoy} /></td><td className="text-right font-semibold">{row.progress}</td><td className="text-center"><Tag tone={row.status === '预警' ? 'red' : row.status === '关注' ? 'amber' : 'green'}>{row.status}</Tag></td></tr>)}</tbody>
             </ReportTable>
           </div>
@@ -449,7 +449,7 @@ function KeyChannelDealerPreview({
     <div className="px-6 pb-6">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-[15px] font-semibold text-slate-800">国内/国际重点渠道商出货明细</h3>
+          <h3 className="text-[15px] font-semibold text-slate-800">国内/国际重点渠道商开单明细</h3>
           <p className="mt-1 text-[12px] text-slate-500">默认展示前 10 条，可进入全部明细页查看完整渠道商列表。</p>
         </div>
         <Button variant="outline" size="sm" onClick={onViewAll}>查看全部</Button>
@@ -482,8 +482,8 @@ function KeyChannelDealerTable({ rows }: { rows: KeyChannelDealerRow[] }) {
         <thead>
           <tr className="bg-slate-50 text-[12px] font-semibold text-slate-600">
             <th className="px-4 py-2.5 text-left">渠道商名称</th>
-            <th className="px-4 py-2.5 text-right">本月出货额</th>
-            <th className="px-4 py-2.5 text-right">上月出货额</th>
+            <th className="px-4 py-2.5 text-right">本月开单额</th>
+            <th className="px-4 py-2.5 text-right">上月开单额</th>
             <th className="px-4 py-2.5 text-right">环比</th>
             <th className="px-4 py-2.5 text-right">去年同期</th>
             <th className="px-4 py-2.5 text-right">同比</th>
@@ -532,7 +532,7 @@ function PieChartBlock({ data, bubble }: { data: Array<{ name: string; value: nu
     <div className="relative h-full">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          <Tooltip formatter={(value) => [amountTooltip(value), '出货额']} />
+          <Tooltip formatter={(value) => [amountTooltip(value), '开单额']} />
           <Pie data={data} dataKey="value" nameKey="name" innerRadius={58} outerRadius={92} paddingAngle={2}>
             {data.map((entry) => <Cell key={entry.name} fill={entry.fill} />)}
           </Pie>

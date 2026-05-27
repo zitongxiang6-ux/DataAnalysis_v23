@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { cn } from '@/lib/utils';
 import {
-  Activity,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -43,15 +42,15 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
       {/* Logo Area */}
       <div className="h-topbar flex items-center justify-center border-b border-[#E5E7EB] flex-shrink-0 px-4">
         {collapsed ? (
-          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-white font-bold text-sm">A</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-[#8B00C4]">
+            <span className="text-[11px] font-black italic tracking-tight text-white">HDL</span>
           </div>
         ) : (
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center flex-shrink-0">
-              <Activity className="w-4 h-4 text-white" />
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-[86px] items-center justify-center rounded-sm bg-[#8B00C4]">
+              <span className="text-[27px] font-black italic leading-none tracking-tight text-white">HDL</span>
             </div>
-            <span className="text-h3 text-text-primary tracking-tight">AnalyticsHub</span>
+            <span className="text-[18px] font-semibold text-[#8B00C4]">CRM</span>
           </div>
         )}
       </div>

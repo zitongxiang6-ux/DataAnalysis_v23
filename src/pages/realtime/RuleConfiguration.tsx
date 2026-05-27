@@ -5,10 +5,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Download, Save, Upload } from 'lucide-react';
+import { Download, Info, Save, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { SHIPPING_DEPARTMENTS } from './sharedOptions';
@@ -99,6 +100,7 @@ export default function RuleConfiguration() {
   const [hasQueried, setHasQueried] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [importOpen, setImportOpen] = useState(false);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [batchSalesperson, setBatchSalesperson] = useState('');
   const [batchDept, setBatchDept] = useState('');
 
@@ -109,6 +111,8 @@ export default function RuleConfiguration() {
   const [shippingReturnNo, setShippingReturnNo] = useState('');
   const [projectNo, setProjectNo] = useState('');
   const [projectName, setProjectName] = useState('');
+  const [productCodeFilter, setProductCodeFilter] = useState('');
+  const [productNameFilter, setProductNameFilter] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [salespersonFilter, setSalespersonFilter] = useState('all');
   const [docTypeFilter, setDocTypeFilter] = useState('all');
@@ -141,6 +145,8 @@ export default function RuleConfiguration() {
       contains(row.shippingReturnNo, shippingReturnNo) &&
       contains(row.projectNo, projectNo) &&
       contains(row.projectName, projectName) &&
+      contains(row.productCode, productCodeFilter) &&
+      contains(row.productName, productNameFilter) &&
       (departmentFilter === 'all' || row.salesDeptName === departmentFilter) &&
       (salespersonFilter === 'all' || row.salespersonName === salespersonFilter) &&
       (docTypeFilter === 'all' || row.docTypeName === docTypeFilter) &&
@@ -166,6 +172,8 @@ export default function RuleConfiguration() {
     setShippingReturnNo('');
     setProjectNo('');
     setProjectName('');
+    setProductCodeFilter('');
+    setProductNameFilter('');
     setDepartmentFilter('all');
     setSalespersonFilter('all');
     setDocTypeFilter('all');
@@ -178,6 +186,14 @@ export default function RuleConfiguration() {
     setBatchSalesperson('');
     setBatchDept('');
     setHasQueried(false);
+  };
+
+  const handleReset = () => {
+    if (hasQueried && resultRows.length > 0) {
+      setResetConfirmOpen(true);
+      return;
+    }
+    resetPage();
   };
 
   const updateAssignment = (
@@ -246,9 +262,12 @@ export default function RuleConfiguration() {
       <section className="rounded-card border border-[#E5E7EB] bg-white shadow-sm">
         <div className="border-b border-[#F3F4F6] px-5 py-4">
           <h2 className="text-base font-semibold text-[#111827]">业绩归属配置</h2>
-          <p className="mt-1 text-[12px] text-[#6B7280]">
-            按销售单、销货/退单和产品明细查询数据后，维护归属业务员与归属部门。
-          </p>
+          <div className="mt-3 flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-[13px] leading-6 text-blue-900">
+            <Info className="mt-1 h-4 w-4 flex-shrink-0 text-primary" />
+            <div>
+              按销售单、销货/退单和产品明细查询数据后，维护归属业务员与归属部门。请先设置查询条件并点击“查询”，系统带出数据行后，再按查询结果维护归属业务员和归属部门。
+            </div>
+          </div>
         </div>
 
         <div className="px-5 py-4">
@@ -275,6 +294,12 @@ export default function RuleConfiguration() {
             <Field label="项目名称">
               <Input value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="项目名称" className="h-9 text-[13px]" />
             </Field>
+            <Field label="品号">
+              <Input value={productCodeFilter} onChange={(event) => setProductCodeFilter(event.target.value)} placeholder="品号" className="h-9 text-[13px]" />
+            </Field>
+            <Field label="品名">
+              <Input value={productNameFilter} onChange={(event) => setProductNameFilter(event.target.value)} placeholder="品名" className="h-9 text-[13px]" />
+            </Field>
             <SelectField label="业务员部门名称" value={departmentFilter} onChange={(value) => {
               setDepartmentFilter(value);
               setSalespersonFilter('all');
@@ -289,7 +314,7 @@ export default function RuleConfiguration() {
               <input type="date" value={dateEnd} onChange={(event) => setDateEnd(event.target.value)} className="h-9 w-full rounded-md border border-[#E5E7EB] bg-white px-3 text-[13px] outline-none focus:border-[#1A56DB]" />
             </Field>
             <div className="col-span-4 flex items-end justify-end gap-2">
-              <Button variant="outline" size="sm" className="h-9 px-4" onClick={resetPage}>重置</Button>
+              <Button variant="outline" size="sm" className="h-9 px-4" onClick={handleReset}>重置</Button>
               <Button size="sm" className="h-9 px-5" onClick={queryRows}>查询</Button>
             </div>
           </div>
@@ -451,6 +476,30 @@ export default function RuleConfiguration() {
               导入数据
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={resetConfirmOpen} onOpenChange={setResetConfirmOpen}>
+        <DialogContent className="max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>确认重置？</DialogTitle>
+            <DialogDescription>
+              点击“重置”会清空下面的查询结果，确认是否清空？
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetConfirmOpen(false)}>
+              取消
+            </Button>
+            <Button
+              onClick={() => {
+                resetPage();
+                setResetConfirmOpen(false);
+              }}
+            >
+              确认
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

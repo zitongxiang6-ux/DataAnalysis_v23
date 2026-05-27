@@ -78,6 +78,10 @@ function formatCurrency(value: number) {
   })}`;
 }
 
+function negativeClass(value: number) {
+  return value < 0 ? 'text-[#DC2626]' : '';
+}
+
 function parseMoneyInput(value: string) {
   const parsed = Number(value.replace(/[^\d.-]/g, ''));
   return Number.isFinite(parsed) ? parsed : 0;
@@ -149,6 +153,10 @@ function makeTotalRow(rows: SalesTargetRow[]): TableRow {
   };
 }
 
+function getInitialTargetSum(row: TableRow) {
+  return row.months.reduce((sum, month) => sum + month.initialTarget, 0);
+}
+
 function buildTableRows(rows: SalesTargetRow[]): TableRow[] {
   const detailRows = rows.map<TableRow>((row) => ({ ...row }));
   const result: TableRow[] = [makeTotalRow(detailRows)];
@@ -201,7 +209,7 @@ function CurrencyCell({
   onChange: (value: string) => void;
 }) {
   if (!editing) {
-    return <span className="font-mono">{formatCurrency(value)}</span>;
+    return <span className={cn('font-mono', negativeClass(value))}>{formatCurrency(value)}</span>;
   }
 
   return (
@@ -256,13 +264,6 @@ export default function SalesTargetManagement() {
     selectableRows.length > 0 && selectableRows.every((row) => selectedKeys.has(row.id));
   const someSelected =
     selectableRows.some((row) => selectedKeys.has(row.id)) && !allSelected;
-
-  const updateAnnualTarget = (id: string, value: string) => {
-    const annualBaseTarget = parseMoneyInput(value);
-    setDraftRows((prev) =>
-      (prev ?? rows).map((row) => (row.id === id ? { ...row, annualBaseTarget } : row))
-    );
-  };
 
   const updateMonthTarget = (
     id: string,
@@ -461,7 +462,10 @@ export default function SalesTargetManagement() {
                 <th className={cn(leftHeaderClass, 'w-[120px] min-w-[120px]')}>分组</th>
                 <th className={cn(leftHeaderClass, 'w-[110px] min-w-[110px]')}>区域</th>
                 <th className={cn(leftHeaderClass, 'w-[110px] min-w-[110px]')}>业务员</th>
-                <th className={cn(headerClass, 'w-[150px] min-w-[150px]')}>保底目标额</th>
+                <th className={cn(headerClass, 'w-[150px] min-w-[150px] bg-[#F3F4F6] text-[#6B7280]')}>
+                  <div>年度目标额</div>
+                  <div className="mt-1 text-[10px] font-normal text-[#9CA3AF]">期初目标之和</div>
+                </th>
                 {monthLabels.map((month) => (
                   <th
                     key={month}
@@ -537,11 +541,11 @@ export default function SalesTargetManagement() {
                       </>
                     )}
                     <td className={cn(leftBodyClass, rowBg, 'font-semibold')}>{row.salesperson}</td>
-                    <td className={cn(bodyClass, rowBg)}>
+                    <td className={cn(bodyClass, rowBg, 'bg-[#F9FAFB] text-[#6B7280]')}>
                       <CurrencyCell
-                        value={row.annualBaseTarget}
-                        editing={rowEditing}
-                        onChange={(value) => updateAnnualTarget(row.id, value)}
+                        value={getInitialTargetSum(row)}
+                        editing={false}
+                        onChange={() => undefined}
                       />
                     </td>
                     {row.months.flatMap((month, index) => [

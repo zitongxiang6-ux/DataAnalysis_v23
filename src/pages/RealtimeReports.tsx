@@ -9,6 +9,7 @@ import {
   Settings,
   Users,
   UserRound,
+  RefreshCw,
 } from 'lucide-react';
 
 // Import tab components
@@ -20,6 +21,7 @@ import RuleConfiguration from './realtime/RuleConfiguration';
 import SalespersonMonthly from './realtime/SalespersonMonthly';
 import MyShippingStats from './realtime/MyShippingStats';
 import SalesTargetManagement from './realtime/SalesTargetManagement';
+import ManualDataUpdate from './realtime/ManualDataUpdate';
 
 interface SubTab {
   key: string;
@@ -36,7 +38,7 @@ export default function RealtimeReports() {
   const subTabs: SubTab[] = [
     {
       key: 'my-shipping',
-      label: '我的出货统计',
+      label: '我的开单统计',
       icon: <UserRound className="w-4 h-4" />,
       component: <MyShippingStats />,
     },
@@ -48,25 +50,25 @@ export default function RealtimeReports() {
     },
     {
       key: 'department',
-      label: '部门出货统计',
+      label: '部门开单统计',
       icon: <Building2 className="w-4 h-4" />,
       component: <DepartmentShipping />,
     },
     {
       key: 'salesperson-monthly',
-      label: '业务出货统计',
+      label: '业务开单统计',
       icon: <Users className="w-4 h-4" />,
       component: <SalespersonMonthly />,
     },
     {
       key: 'channel',
-      label: '客户出货统计',
+      label: '客户开单统计',
       icon: <Globe className="w-4 h-4" />,
       component: <ChannelDealer />,
     },
     {
       key: 'target',
-      label: '季度目标统计',
+      label: '签约渠道商季度目标统计',
       icon: <Target className="w-4 h-4" />,
       component: <QuarterlyTarget />,
     },
@@ -81,6 +83,12 @@ export default function RealtimeReports() {
       label: '业绩归属配置',
       icon: <Settings className="w-4 h-4" />,
       component: <RuleConfiguration />,
+    },
+    {
+      key: 'manual-update',
+      label: '手动更新数据',
+      icon: <RefreshCw className="w-4 h-4" />,
+      component: <ManualDataUpdate />,
     },
   ];
 

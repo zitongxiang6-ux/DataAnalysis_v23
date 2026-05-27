@@ -183,7 +183,7 @@ const companyTop30Customers: CompanyTopCustomer[] = [
   { rank: 2, name: '上海新联电子', scope: 'global_channel', customerType: '国内渠道商', owner: '李姝', annual2025: 4856, ytd2026: 2425, yoy: 18.2, status: '稳定贡献', action: '跟进重点项目交付节奏' },
   { rank: 3, name: '新加坡AsiaTech', scope: 'international_hotel', customerType: '国际重点渠道商', owner: '王强', annual2025: 3650, ytd2026: 1865, yoy: 28.6, status: '稳定贡献', action: '提前锁定Q3排期' },
   { rank: 4, name: '北京中科创新', scope: 'domestic_key_account', customerType: '国内重点渠道商', owner: '刘敏', annual2025: 3280, ytd2026: 1520, yoy: 16.8, status: '稳定贡献', action: '推进在谈项目验收' },
-  { rank: 5, name: '杭州智联网终端', scope: 'domestic_key_account', customerType: '国内地产客户', owner: '赵强', annual2025: 2985, ytd2026: 1425, yoy: 12.1, status: '稳定贡献', action: '保持地产项目出货节奏' },
+  { rank: 5, name: '杭州智联网终端', scope: 'domestic_key_account', customerType: '国内地产客户', owner: '赵强', annual2025: 2985, ytd2026: 1425, yoy: 12.1, status: '稳定贡献', action: '保持地产项目开单节奏' },
   { rank: 6, name: '广州恒通科技', scope: 'global_channel', customerType: '国内渠道商', owner: '陈芸', annual2025: 2880, ytd2026: 1318, yoy: 10.5, status: '冲刺提升', action: '补齐在谈订单转化' },
   { rank: 7, name: '印度MumbaiTech', scope: 'global_channel', customerType: 'ODM客户', owner: '王强', annual2025: 2760, ytd2026: 1225, yoy: 24.8, status: '稳定贡献', action: '提升ODM交付稳定性' },
   { rank: 8, name: '东莞精密制造', scope: 'global_channel', customerType: '国内渠道商', owner: '刘舟', annual2025: 2680, ytd2026: 185, yoy: -42.6, status: '重点预警', action: '安排专项回访排查流失原因' },
@@ -346,7 +346,7 @@ export default function DepartmentReport() {
     return period.trendLabels.map((label, index) => {
       const ship = Math.round(amount * period.trendWeights[index]);
       cumulative += ship;
-      return { label, 出货额: ship, 累计出货额: cumulative };
+      return { label, 开单额: ship, 累计开单额: cumulative };
     });
   }, [amount, period]);
 
@@ -399,8 +399,8 @@ export default function DepartmentReport() {
   );
   const comparisonLabel = reportType === 'monthly' ? '去年同月' : reportType === 'quarterly' ? '去年同季度' : '去年同期';
   const bestTrendPoint = trendData.reduce(
-    (best, item) => (item.出货额 > best.出货额 ? item : best),
-    trendData[0] ?? { label: period.unit, 出货额: amount, 累计出货额: amount },
+    (best, item) => (item.开单额 > best.开单额 ? item : best),
+    trendData[0] ?? { label: period.unit, 开单额: amount, 累计开单额: amount },
   );
   const lastTrendPoint = trendData[trendData.length - 1] ?? bestTrendPoint;
   const tailSalesperson = scaledSalespeople[scaledSalespeople.length - 1];
@@ -438,7 +438,7 @@ export default function DepartmentReport() {
         <Card>
           <SectionHeader index={1} title={`${period.unit}核心指标总览`} />
           <div className="grid grid-cols-2 gap-4 p-6 lg:grid-cols-4">
-            <MetricCard label={`${period.unit}出货额`} value={currencyWan(amount)} sub={`部门目标 ${currencyWan(target)}`} change={profile.mom} changeSuffix={`环比${period.previousUnit}`} color="border-t-blue-600" />
+            <MetricCard label={`${period.unit}开单额`} value={currencyWan(amount)} sub={`部门目标 ${currencyWan(target)}`} change={profile.mom} changeSuffix={`环比${period.previousUnit}`} color="border-t-blue-600" />
             <MetricCard label="未结束订单金额" value={currencyWan(openOrder)} sub={`${scaledRisks.length} 笔重点跟进订单`} change={-4.8} changeSuffix={`环比${period.previousUnit}`} inverse color="border-t-amber-600" />
             <MetricCard label="年完成额" value={currencyWan(profile.yearDone)} sub={`年度目标 ${currencyWan(profile.yearTarget)}`} changeText="进度正常" color="border-t-teal-600" />
             <MetricCard label="年完成率" value={`${yearRate}%`} sub="按当前部门年度目标计算" changeText="超过公司完成率3%" color="border-t-rose-600" />
@@ -450,35 +450,35 @@ export default function DepartmentReport() {
           <SummaryBox>
             <div className="space-y-3">
               <p className="indent-8">
-                {profile.name}{period.unit}出货额 <Highlight>{currencyWan(amount)}</Highlight>，目标完成率 <Highlight>{completion}%</Highlight>。
+                {profile.name}{period.unit}开单额 <Highlight>{currencyWan(amount)}</Highlight>，目标完成率 <Highlight>{completion}%</Highlight>。
                 同比{comparisonLabel} <TrendText value={profile.yoy} />，环比{period.previousUnit} <TrendText value={profile.mom} />，
-                整体出货节奏好于{period.previousUnit}，且同比{comparisonLabel}表现更好，说明当前客户需求、订单交付和重点项目转化均较基准周期改善。
+                整体开单节奏好于{period.previousUnit}，且同比{comparisonLabel}表现更好，说明当前客户需求、订单交付和重点项目转化均较基准周期改善。
               </p>
               <p className="indent-8">
-                从时间节奏看，<Highlight>{bestTrendPoint.label}</Highlight>出货 <Highlight>{currencyWan(bestTrendPoint.出货额)}</Highlight>，
-                是{period.unit}表现最好的阶段；截至{lastTrendPoint.label}累计出货达到 <Highlight>{currencyWan(lastTrendPoint.累计出货额)}</Highlight>。
+                从时间节奏看，<Highlight>{bestTrendPoint.label}</Highlight>开单 <Highlight>{currencyWan(bestTrendPoint.开单额)}</Highlight>，
+                是{period.unit}表现最好的阶段；截至{lastTrendPoint.label}累计开单达到 <Highlight>{currencyWan(lastTrendPoint.累计开单额)}</Highlight>。
                 后续应延续高峰阶段的客户跟进节奏，并复盘低峰阶段是否存在排产、签收或客户确认滞后的问题。
               </p>
               <p className="indent-8">
-                从人员贡献看，<Highlight>{scaledSalespeople[0]?.name}</Highlight>{period.unit}出货 <Highlight>{currencyWan(scaledSalespeople[0]?.amount || 0)}</Highlight>，
+                从人员贡献看，<Highlight>{scaledSalespeople[0]?.name}</Highlight>{period.unit}开单 <Highlight>{currencyWan(scaledSalespeople[0]?.amount || 0)}</Highlight>，
                 完成率 <Highlight>{scaledSalespeople[0]?.completion}%</Highlight>，是部门主要拉动项；
                 <Highlight>{scaledSalespeople[1]?.name}</Highlight> 与 <Highlight>{scaledSalespeople[2]?.name}</Highlight> 保持第二梯队贡献。
-                尾部业务员为 <Highlight>{tailSalesperson?.name || '-'}</Highlight>，{period.unit}出货 <Highlight>{currencyWan(tailSalesperson?.amount || 0)}</Highlight>，
+                尾部业务员为 <Highlight>{tailSalesperson?.name || '-'}</Highlight>，{period.unit}开单 <Highlight>{currencyWan(tailSalesperson?.amount || 0)}</Highlight>，
                 完成率 <Highlight>{tailSalesperson?.completion || 0}%</Highlight>，需要重点补足客户拜访、在谈订单推进和尾单转化。
               </p>
               <p className="indent-8">
                 从客户结构看，<Highlight>{scaledCustomerTypes[0].name}</Highlight> 贡献 <Highlight>{currencyWan(scaledCustomerTypes[0].value)}</Highlight>，
-                是当前部门最核心的出货来源；重点客户中 <Highlight>{scaledCustomers[0]?.name}</Highlight> 出货
+                是当前部门最核心的开单来源；重点客户中 <Highlight>{scaledCustomers[0]?.name}</Highlight> 开单
                 <Highlight>{currencyWan(scaledCustomers[0]?.amount || 0)}</Highlight>，同比 <TrendText value={scaledCustomers[0]?.change || 0} />，
                 头部客户复购和项目推进仍是增长的主要支撑。尾部客户为 <Highlight>{tailCustomer?.name || '-'}</Highlight>，
-                {period.unit}出货 <Highlight>{currencyWan(tailCustomer?.amount || 0)}</Highlight>，未结束订单 <Highlight>{currencyWan(tailCustomer?.openOrder || 0)}</Highlight>，
+                {period.unit}开单 <Highlight>{currencyWan(tailCustomer?.amount || 0)}</Highlight>，未结束订单 <Highlight>{currencyWan(tailCustomer?.openOrder || 0)}</Highlight>，
                 需要确认需求稳定性、报价推进和交付节点，避免尾部客户继续拖低部门整体转化。
               </p>
               <p className="indent-8">
                 从交付风险看，未结束订单金额 <Highlight>{currencyWan(openOrder)}</Highlight>，其中
                 <Highlight>{scaledRisks[0]?.customer}</Highlight> 的 {scaledRisks[0]?.orderNo} 金额较高、等待时长较长，
                 当前共有 <Highlight>{scaledRisks.length} 笔</Highlight> 重点风险订单需要跟进。建议部门总经理优先协调销售、交付和财务资源，
-                对超过 48 小时未结订单建立每日复盘机制，避免影响下一周期出货节奏。
+                对超过 48 小时未结订单建立每日复盘机制，避免影响下一周期开单节奏。
               </p>
               <WarningText>
                 部门动作建议：保住头部客户复购节奏，把低于目标完成率的业务员和尾部客户纳入专项跟进清单；对高金额未结束订单明确责任人、预计结单时间和跨部门协同事项。
@@ -488,8 +488,8 @@ export default function DepartmentReport() {
 
           <div className="grid grid-cols-1 gap-6 px-6 pb-6 lg:grid-cols-2">
             <ChartBlock
-              title={`${period.unit}出货趋势`}
-              summary={`小结：${period.unit}累计出货保持上行，${bestTrendPoint.label}单期表现最好，${lastTrendPoint.label}累计达到 ${currencyWan(amount)}，部门应继续关注高峰阶段后的订单承接。`}
+              title={`${period.unit}开单趋势`}
+              summary={`小结：${period.unit}累计开单保持上行，${bestTrendPoint.label}单期表现最好，${lastTrendPoint.label}累计达到 ${currencyWan(amount)}，部门应继续关注高峰阶段后的订单承接。`}
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trendData}>
@@ -498,15 +498,15 @@ export default function DepartmentReport() {
                   <YAxis tick={{ fontSize: 12, fill: '#94A3B8' }} tickLine={false} axisLine={false} tickFormatter={(value) => `¥${value}万`} />
                   <Tooltip formatter={(value) => [tooltipAmount(value), '']} />
                   <Legend />
-                  <Line dataKey="出货额" stroke="#2563EB" strokeWidth={2.4} dot={{ r: 3 }} />
-                  <Line dataKey="累计出货额" stroke="#059669" strokeWidth={2.4} dot={{ r: 3 }} />
+                  <Line dataKey="开单额" stroke="#2563EB" strokeWidth={2.4} dot={{ r: 3 }} />
+                  <Line dataKey="累计开单额" stroke="#059669" strokeWidth={2.4} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartBlock>
 
             <ChartBlock
-              title={`${period.unit}业务员出货TOP5`}
-              summary={`小结：${scaledSalespeople[0]?.name}${period.unit}出货最高，较${period.previousUnit}保持增长；${scaledSalespeople[1]?.name}与${scaledSalespeople[2]?.name}构成第二梯队。需要重点关注${period.unit}低于${period.previousUnit}或环比偏弱的业务员，推动在谈订单尽快出货。`}
+              title={`${period.unit}业务员开单TOP5`}
+              summary={`小结：${scaledSalespeople[0]?.name}${period.unit}开单最高，较${period.previousUnit}保持增长；${scaledSalespeople[1]?.name}与${scaledSalespeople[2]?.name}构成第二梯队。需要重点关注${period.unit}低于${period.previousUnit}或环比偏弱的业务员，推动在谈订单尽快开单。`}
             >
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={salespersonChartData}>
@@ -527,27 +527,27 @@ export default function DepartmentReport() {
           <SectionHeader index={3} title="客户结构与重点客户" />
           <div className="grid grid-cols-1 gap-6 px-6 py-5 lg:grid-cols-[0.9fr_1.1fr]">
             <ChartBlock
-              title="本部门客户类型出货占比"
-              bubble={<><div className="font-semibold text-slate-700">{scaledCustomerTypes[0].name}</div><div className="text-primary">出货额：{currencyWan(scaledCustomerTypes[0].value)}</div></>}
+              title="本部门客户类型开单占比"
+              bubble={<><div className="font-semibold text-slate-700">{scaledCustomerTypes[0].name}</div><div className="text-primary">开单额：{currencyWan(scaledCustomerTypes[0].value)}</div></>}
             >
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={scaledCustomerTypes} dataKey="value" nameKey="name" innerRadius={66} outerRadius={104} paddingAngle={2}>
                     {scaledCustomerTypes.map((entry) => <Cell key={entry.name} fill={entry.fill} />)}
                   </Pie>
-                  <Tooltip formatter={(value) => [tooltipAmount(value), '出货额']} />
+                  <Tooltip formatter={(value) => [tooltipAmount(value), '开单额']} />
                   <Legend verticalAlign="bottom" height={28} />
                 </PieChart>
               </ResponsiveContainer>
             </ChartBlock>
 
-            <ReportTable title="重点客户出货TOP5">
+            <ReportTable title="重点客户开单TOP5">
               <thead>
                 <tr>
                   <th>排名</th>
                   <th>客户名称</th>
                   <th>客户类型</th>
-                  <th className="text-right">{period.unit}出货额</th>
+                  <th className="text-right">{period.unit}开单额</th>
                   <th className="text-right">未结束订单</th>
                   <th className="text-right">同比</th>
                 </tr>
@@ -567,7 +567,7 @@ export default function DepartmentReport() {
             </ReportTable>
             <p className="rounded-lg bg-slate-50 px-4 py-3 text-[12px] leading-6 text-slate-600 lg:col-span-2">
               小结：{scaledCustomerTypes[0].name}仍是当前部门的主要来源，贡献 {currencyWan(scaledCustomerTypes[0].value)}；
-              重点客户中 {scaledCustomers[0]?.name} 贡献最高，{period.unit}出货 {currencyWan(scaledCustomers[0]?.amount || 0)}，
+              重点客户中 {scaledCustomers[0]?.name} 贡献最高，{period.unit}开单 {currencyWan(scaledCustomers[0]?.amount || 0)}，
               同比 <TrendText value={scaledCustomers[0]?.change || 0} />，未结束订单 {currencyWan(scaledCustomers[0]?.openOrder || 0)}。
               {scaledCustomers[1]?.name} 与 {scaledCustomers[2]?.name} 构成第二梯队，建议继续保障头部客户交付稳定性，同时关注
               {tailCustomer?.name || '-'} 等尾部客户的订单转化和复购节奏，避免客户贡献过度集中。
@@ -612,18 +612,18 @@ export default function DepartmentReport() {
 
         {reportType !== 'weekly' && (
           <Card>
-            <SectionHeader index={5} title="公司2025年前30客户 & 2026年出货情况" />
+            <SectionHeader index={5} title="公司2025年前30客户 & 2026年开单情况" />
             <SummaryBox>
               <div className="space-y-3">
                 <p className="indent-8">
-                  该分析口径以 <Highlight>公司级 2025 年出货额前30客户</Highlight> 为基础，再筛选出归属本部门的客户。
+                  该分析口径以 <Highlight>公司级 2025 年开单额前30客户</Highlight> 为基础，再筛选出归属本部门的客户。
                   本部门当前命中公司前30客户 <Highlight>{departmentCompanyTopCustomers.length} 家</Highlight>，
-                  2026年至今累计出货 <Highlight>{currencyWan(topCustomerYtdAmount)}</Highlight>，
-                  {period.unit}合计出货 <Highlight>{currencyWan(topCustomerAmount)}</Highlight>，说明公司级头部客户仍是本部门出货稳定性的关键来源。
+                  2026年至今累计开单 <Highlight>{currencyWan(topCustomerYtdAmount)}</Highlight>，
+                  {period.unit}合计开单 <Highlight>{currencyWan(topCustomerAmount)}</Highlight>，说明公司级头部客户仍是本部门开单稳定性的关键来源。
                 </p>
                 <p className="indent-8">
                   从客户表现看，<Highlight>{topDepartmentCustomer?.name || '-'}</Highlight> 是当前命中的头部客户，
-                  2026年至今出货 <Highlight>{currencyWan(topDepartmentCustomer?.ytd2026 || 0)}</Highlight>，
+                  2026年至今开单 <Highlight>{currencyWan(topDepartmentCustomer?.ytd2026 || 0)}</Highlight>，
                   时间进度占比 <Highlight>{topDepartmentCustomer?.progress || 0}%</Highlight>，同比
                   <TrendText value={topDepartmentCustomer?.yoy || 0} />。当前进度正常客户
                   <Highlight>{normalCustomerCount} 家</Highlight>，关注客户 <Highlight>{attentionCustomerCount} 家</Highlight>，
@@ -631,7 +631,7 @@ export default function DepartmentReport() {
                 </p>
                 <p className="indent-8">
                   从管理动作看，对<Highlight>正常</Highlight>客户保持复购节奏和交付确定性；对
-                  <Highlight>关注</Highlight>客户提升拜访频次、推进在谈订单转出货；对
+                  <Highlight>关注</Highlight>客户提升拜访频次、推进在谈订单转开单；对
                   <Highlight>预警</Highlight>客户建立总经理跟进清单。尤其是
                   <Highlight>{slowestProgressCustomer?.name || '-'}</Highlight> 当前时间进度占比仅
                   <Highlight>{slowestProgressCustomer?.progress || 0}%</Highlight>，需要优先排查价格、交付、竞品切换和项目延期风险。
@@ -656,7 +656,7 @@ export default function DepartmentReport() {
                     <th>客户名称</th>
                     <th>客户类型</th>
                     <th>国内/国际</th>
-                    <th className="text-right">2025全年出货</th>
+                    <th className="text-right">2025全年开单</th>
                     <th className="text-right">2026至今</th>
                     <th className="text-right">同比去年1-5月</th>
                     <th className="text-right">时间进度占比</th>
@@ -689,7 +689,7 @@ export default function DepartmentReport() {
                 </tbody>
               </ReportTable>
               <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-[12px] leading-6 text-slate-600">
-                小结：本部门命中的公司前30客户共 {departmentCompanyTopCustomers.length} 家，2026年至今累计出货 {currencyWan(topCustomerYtdAmount)}，
+                小结：本部门命中的公司前30客户共 {departmentCompanyTopCustomers.length} 家，2026年至今累计开单 {currencyWan(topCustomerYtdAmount)}，
                 其中 {topDepartmentCustomer?.name || '-'} 贡献最高，时间进度占比 {topDepartmentCustomer?.progress || 0}%；
                 {riskCustomerCount > 0
                   ? `当前有 ${riskCustomerCount} 家客户处于重点预警，需要优先复盘流失原因和下周期挽回动作。`

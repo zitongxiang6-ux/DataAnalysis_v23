@@ -96,7 +96,7 @@ export function KpiCard({
             {label}
           </p>
 
-          <div className="mb-2 text-data-large text-text-primary">
+          <div className={cn('mb-2 text-data-large text-text-primary', value < 0 && 'text-danger')}>
             {inView ? (
               <CountUp
                 start={0}

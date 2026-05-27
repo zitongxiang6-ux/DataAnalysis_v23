@@ -51,7 +51,7 @@ export default function ChannelDealer() {
       <div className="mb-6">
         <h1 className="text-h1 text-text-primary">渠道商签约统计</h1>
         <p className="text-body-small text-text-secondary mt-1">
-          国内与国际渠道商签约、出货及完成率分析
+          国内与国际渠道商签约、开单及完成率分析
         </p>
       </div>
 
@@ -115,7 +115,7 @@ export default function ChannelDealer() {
       </div>
 
       {/* Bar Chart */}
-      <SectionCard title="渠道商出货额排名 (TOP10)" className="mb-6">
+      <SectionCard title="渠道商开单额排名 (TOP10)" className="mb-6">
         <div className="h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} layout="vertical" margin={{ left: 20, right: 30, top: 10, bottom: 10 }}>
@@ -123,7 +123,7 @@ export default function ChannelDealer() {
               <XAxis type="number" tickFormatter={(v) => `¥${(v / 10000).toFixed(0)}万`} style={{ fontSize: 12, fill: '#6B7280' }} />
               <YAxis type="category" dataKey="name" width={140} style={{ fontSize: 12, fill: '#1F2937' }} />
               <Tooltip
-                formatter={((value: number) => [formatCurrency(value), '出货额']) as any}
+                formatter={((value: number) => [formatCurrency(value), '开单额']) as any}
                 contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13 }}
               />
               <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={20}>
@@ -155,7 +155,7 @@ export default function ChannelDealer() {
                 <th className="w-10 px-3 py-2" />
                 <th className="px-3 py-2 text-left text-table-header text-text-secondary uppercase">渠道商名称</th>
                 <th className="px-3 py-2 text-left text-table-header text-text-secondary uppercase">渠道类型</th>
-                <th className="px-3 py-2 text-right text-table-header text-text-secondary uppercase">出货额</th>
+                <th className="px-3 py-2 text-right text-table-header text-text-secondary uppercase">开单额</th>
                 <th className="px-3 py-2 text-right text-table-header text-text-secondary uppercase">签约金额</th>
                 <th className="px-3 py-2 text-right text-table-header text-text-secondary uppercase">完成率</th>
                 <th className="px-3 py-2 text-right text-table-header text-text-secondary uppercase">同期对比</th>
@@ -226,7 +226,7 @@ export default function ChannelDealer() {
                               <tr className="border-b border-[#E5E7EB]">
                                 <th className="py-2 text-left text-caption text-text-secondary">客户名称</th>
                                 <th className="py-2 text-left text-caption text-text-secondary">客户类型</th>
-                                <th className="py-2 text-right text-caption text-text-secondary">出货额</th>
+                                <th className="py-2 text-right text-caption text-text-secondary">开单额</th>
                                 <th className="py-2 text-right text-caption text-text-secondary">订单数</th>
                                 <th className="py-2 text-right text-caption text-text-secondary">最近订单</th>
                                 <th className="py-2 text-left text-caption text-text-secondary">业务员</th>

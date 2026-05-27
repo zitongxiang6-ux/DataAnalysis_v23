@@ -22,7 +22,7 @@ export const dimensionCards: DimensionCard[] = [
     icon: 'Users',
     keyMetric: '52',
     keyLabel: '家渠道商',
-    description: '国内与国际渠道商签约及出货数据统计',
+    description: '国内与国际渠道商签约及开单数据统计',
     route: '/channel-dealer',
     status: 'ready',
   },
@@ -122,7 +122,7 @@ export const dimensionCards: DimensionCard[] = [
     icon: 'TrendingUp',
     keyMetric: '30',
     keyLabel: '家大客户',
-    description: '按出货额排名前30客户及排名变化追踪',
+    description: '按开单额排名前30客户及排名变化追踪',
     route: '/top-customer',
     status: 'ready',
   },
@@ -130,7 +130,7 @@ export const dimensionCards: DimensionCard[] = [
 
 export const overviewKpis = [
   { label: '总签约额', value: 18450000, prefix: '¥', suffix: '', decimals: 2, format: true, trend: 14.2, comparison: 'vs 上月' },
-  { label: '总出货额', value: 16230000, prefix: '¥', suffix: '', decimals: 2, format: true, trend: 8.7, comparison: 'vs 上月' },
+  { label: '总开单额', value: 16230000, prefix: '¥', suffix: '', decimals: 2, format: true, trend: 8.7, comparison: 'vs 上月' },
   { label: '平均完成率', value: 82.4, prefix: '', suffix: '%', decimals: 1, format: false, trend: 3.1, comparison: 'vs 上月' },
   { label: '活跃客户数', value: 186, prefix: '', suffix: '', decimals: 0, format: false, trend: 5.3, comparison: 'vs 上月' },
 ];
@@ -164,7 +164,7 @@ export interface DealerData {
 
 export const dealerKpis = [
   { label: '签约渠道商数', value: 52, prefix: '', suffix: '家', decimals: 0, format: false, trend: 8.3, comparison: 'vs 上季度' },
-  { label: '出货总额', value: 12450000, prefix: '¥', suffix: '', decimals: 2, format: true, trend: 18.3, comparison: 'vs 上季度' },
+  { label: '开单总额', value: 12450000, prefix: '¥', suffix: '', decimals: 2, format: true, trend: 18.3, comparison: 'vs 上季度' },
   { label: '平均签约完成率', value: 76.8, prefix: '', suffix: '%', decimals: 1, format: false, trend: 3.2, comparison: 'vs 上季度' },
   { label: '未结束订单金额', value: 2340000, prefix: '¥', suffix: '', decimals: 2, format: true, trend: -5.1, comparison: 'vs 上季度' },
 ];
@@ -413,8 +413,8 @@ export interface TopCustomer {
 }
 
 export const topCustomerKpis = [
-  { label: 'TOP30总出货额', value: 28450000, prefix: '¥', suffix: '', decimals: 2, format: true, trend: 10.2, comparison: 'vs 上期' },
-  { label: '平均出货额', value: 947800, prefix: '¥', suffix: '', decimals: 0, format: true, trend: 5.8, comparison: 'vs 上期' },
+  { label: 'TOP30总开单额', value: 28450000, prefix: '¥', suffix: '', decimals: 2, format: true, trend: 10.2, comparison: 'vs 上期' },
+  { label: '平均开单额', value: 947800, prefix: '¥', suffix: '', decimals: 0, format: true, trend: 5.8, comparison: 'vs 上期' },
   { label: '排名变化客户数', value: 18, prefix: '', suffix: '家', decimals: 0, format: false, trend: 0, comparison: '上升: 8 / 下降: 5' },
   { label: '新增TOP30客户', value: 3, prefix: '', suffix: '家', decimals: 0, format: false, trend: 0, comparison: '新进入排名' },
 ];
