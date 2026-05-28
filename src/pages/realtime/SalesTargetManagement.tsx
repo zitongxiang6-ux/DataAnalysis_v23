@@ -239,7 +239,6 @@ export default function SalesTargetManagement() {
     normalizeRows(getSalespersonMonthlyData().rows)
   );
   const [draftRows, setDraftRows] = useState<SalesTargetRow[] | null>(null);
-  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [importOpen, setImportOpen] = useState(false);
 
   const isEditing = Boolean(draftRows);
@@ -268,11 +267,6 @@ export default function SalesTargetManagement() {
   );
 
   const tableRows = useMemo(() => buildTableRows(filteredRows), [filteredRows]);
-  const selectableRows = tableRows.filter((row) => !row.isTotal);
-  const allSelected =
-    selectableRows.length > 0 && selectableRows.every((row) => selectedKeys.has(row.id));
-  const someSelected =
-    selectableRows.some((row) => selectedKeys.has(row.id)) && !allSelected;
 
   const updateMonthTarget = (
     id: string,
@@ -338,32 +332,6 @@ export default function SalesTargetManagement() {
     toast.success('查询完成', { description: '已按当前筛选条件刷新列表' });
   };
 
-  const toggleSelectAll = () => {
-    setSelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (allSelected) {
-        selectableRows.forEach((row) => next.delete(row.id));
-      } else {
-        selectableRows.forEach((row) => next.add(row.id));
-      }
-      return next;
-    });
-  };
-
-  const toggleRow = (id: string) => {
-    setSelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  const selectedCount = selectableRows.filter((row) => selectedKeys.has(row.id)).length;
-
   return (
     <div className="animate-fade-in">
       <div className="mb-6 flex items-center justify-between">
@@ -384,7 +352,6 @@ export default function SalesTargetManagement() {
             onValueChange={(value) => {
               setDepartmentFilter(value);
               setSalespersonFilter('all');
-              setSelectedKeys(new Set());
             }}
           >
             <SelectTrigger className="h-9 w-[180px]">
@@ -456,11 +423,8 @@ export default function SalesTargetManagement() {
               className="gap-1.5"
             >
               <Upload className="h-3.5 w-3.5" />
-              导入期初数据
+              导入数据
             </Button>
-            <span className="text-caption text-text-secondary">
-              已选 <span className="font-semibold text-primary">{selectedCount}</span> 条
-            </span>
           </div>
           <span className="text-[12px] text-text-tertiary">
             合计行仅用于汇总查看，不参与编辑。
@@ -471,17 +435,6 @@ export default function SalesTargetManagement() {
           <table className="w-max min-w-full border-collapse text-[12px]">
             <thead>
               <tr>
-                <th className={cn(leftHeaderClass, 'w-[42px] min-w-[42px] text-center')}>
-                  <input
-                    type="checkbox"
-                    className="cursor-pointer"
-                    checked={allSelected}
-                    ref={(input) => {
-                      if (input) input.indeterminate = someSelected;
-                    }}
-                    onChange={toggleSelectAll}
-                  />
-                </th>
                 <th className={cn(leftHeaderClass, 'w-[120px] min-w-[120px]')}>部门</th>
                 <th className={cn(leftHeaderClass, 'w-[120px] min-w-[120px]')}>分组</th>
                 <th className={cn(leftHeaderClass, 'w-[110px] min-w-[110px]')}>区域</th>
@@ -498,7 +451,6 @@ export default function SalesTargetManagement() {
                 ))}
               </tr>
               <tr>
-                <th className={cn(leftHeaderClass, 'w-[42px] min-w-[42px]')} />
                 <th className={cn(leftHeaderClass, 'w-[120px] min-w-[120px]')} />
                 <th className={cn(leftHeaderClass, 'w-[120px] min-w-[120px]')} />
                 <th className={cn(leftHeaderClass, 'w-[110px] min-w-[110px]')} />
@@ -521,15 +473,6 @@ export default function SalesTargetManagement() {
 
                 return (
                   <tr key={row.id} className={cn(!row.isTotal && 'hover:bg-[#F9FAFB]')}>
-                    <td className={cn(leftBodyClass, rowBg, 'w-[42px] min-w-[42px] text-center')}>
-                      <input
-                        type="checkbox"
-                        className="cursor-pointer"
-                        checked={selectedKeys.has(row.id)}
-                        disabled={row.isTotal}
-                        onChange={() => toggleRow(row.id)}
-                      />
-                    </td>
                     {row.isTotal ? (
                       <>
                         <td className={cn(leftBodyClass, rowBg, 'font-semibold')}>合计</td>
@@ -600,7 +543,7 @@ export default function SalesTargetManagement() {
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
         <DialogContent className="max-w-[460px]">
           <DialogHeader>
-            <DialogTitle>导入期初数据</DialogTitle>
+            <DialogTitle>导入数据</DialogTitle>
             <DialogDescription>
               请选择数据所属年份后再导入，系统会按模板字段写入对应年份的期初目标。
             </DialogDescription>
