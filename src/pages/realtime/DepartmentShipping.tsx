@@ -73,6 +73,11 @@ interface TableRow extends SourceRow {
   yoyGrowthRate: number;
 }
 
+interface DisplayTableRow extends TableRow {
+  departmentRowSpan?: number;
+  groupRowSpan?: number;
+}
+
 const CURRENT_MONTH: MonthKey = 'apr';
 const monthColumns: { key: MonthKey; label: string }[] = [
   { key: 'jan', label: '1月' },
@@ -117,6 +122,19 @@ const sortableColumns: { key: SortKey; label: string; className: string; sortabl
   { key: 'annualOrder', label: '年度开单额', className: 'w-[130px] min-w-[130px]' },
   { key: 'annualCompletionRate', label: '年度开单达成率', className: 'w-[150px] min-w-[150px]' },
 ];
+
+const visibleColumns: { key: SortKey; label: string; className: string; sortable?: boolean }[] = [
+  { key: 'currentTarget', label: '当月实际目标额', className: 'w-[140px] min-w-[140px]', sortable: false },
+  { key: 'currentOrder', label: '当月开单额', className: 'w-[140px] min-w-[140px]' },
+  { key: 'currentRate', label: '当月实际目标达成率', className: 'w-[160px] min-w-[160px]' },
+  { key: 'cumulativeTarget', label: '实际目标额', className: 'w-[140px] min-w-[140px]', sortable: false },
+  { key: 'cumulativeOrder', label: '开单额', className: 'w-[140px] min-w-[140px]' },
+  { key: 'cumulativeOrderRate', label: '实际目标达成率', className: 'w-[150px] min-w-[150px]' },
+  { key: 'annualCompletionRate', label: '年度目标达成率', className: 'w-[150px] min-w-[150px]' },
+  { key: 'yoyDiff', label: '同比差额', className: 'w-[130px] min-w-[130px]', sortable: false },
+  { key: 'yoyGrowthRate', label: '同比增长率', className: 'w-[130px] min-w-[130px]', sortable: false },
+];
+void sortableColumns;
 
 const leftHeaderClass = 'border-b border-r border-[#D8DEE9] bg-[#F8FAFC] px-2 py-3 text-left font-semibold text-[#111827]';
 const bodyCellClass = 'border-b border-r border-[#E5E7EB] px-2 py-3';
@@ -261,6 +279,51 @@ function sortRows(rows: TableRow[], sortConfig: { key: SortKey; direction: SortD
   return [...totalRows, ...sorted];
 }
 
+function withRowSpans(rows: TableRow[]) {
+  const displayRows = rows.map((row) => ({ ...row })) as DisplayTableRow[];
+  const countDepartmentSpan = (startIndex: number) => {
+    const department = displayRows[startIndex].department;
+    let count = 0;
+    for (let index = startIndex; index < displayRows.length; index += 1) {
+      const item = displayRows[index];
+      if (item.rowType === 'total' || item.department !== department) break;
+      count += 1;
+    }
+    return count;
+  };
+  const countGroupSpan = (startIndex: number) => {
+    const { department, group } = displayRows[startIndex];
+    let count = 0;
+    for (let index = startIndex; index < displayRows.length; index += 1) {
+      const item = displayRows[index];
+      if (item.rowType || item.department !== department || item.group !== group) break;
+      count += 1;
+    }
+    return count;
+  };
+
+  displayRows.forEach((row, index) => {
+    const previous = displayRows[index - 1];
+    if (row.rowType === 'total') {
+      row.departmentRowSpan = 1;
+      row.groupRowSpan = 1;
+      return;
+    }
+    if (!previous || previous.rowType === 'total' || previous.department !== row.department) {
+      row.departmentRowSpan = countDepartmentSpan(index);
+    }
+    if (row.rowType === 'subtotal') {
+      row.groupRowSpan = 1;
+      return;
+    }
+    if (!previous || previous.rowType || previous.department !== row.department || previous.group !== row.group) {
+      row.groupRowSpan = countGroupSpan(index);
+    }
+  });
+
+  return displayRows;
+}
+
 function renderValue(row: TableRow, key: SortKey) {
   if (key.endsWith('Rate')) return fmtPct(row[key]);
   if (key === 'yoyDiff') return `${row.yoyDiff >= 0 ? '+' : ''}${fmtCurrency(row.yoyDiff)}`;
@@ -315,8 +378,8 @@ function MonthlyDetailDialog({ row, onClose }: { row: TableRow | null; onClose: 
                   <tr>
                     <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-left font-semibold">月份</th>
                     <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">实际目标额</th>
-                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">实际开单额</th>
-                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">实际开单达成率</th>
+                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">开单额</th>
+                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">实际目标达成率</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -362,6 +425,7 @@ export default function DepartmentShipping() {
     () => sortRows(withSubtotals(filteredRows), sortConfig),
     [filteredRows, sortConfig]
   );
+  const displayRows = useMemo(() => withRowSpans(tableRows), [tableRows]);
   const tabFilterOptions = useMemo(
     () =>
       SHIPPING_HIERARCHY_FILTER_OPTIONS.filter((option) => {
@@ -473,7 +537,7 @@ export default function DepartmentShipping() {
         </div>
       </div>
 
-      <DataUpdateNotice text="当月实际开单额、当月实际开单达成率、年度开单额、年度开单达成率每天 19:00 自动更新；累计开单额、累计开单达成率、同比差额、同比增长率每月最后一天 19:00 更新至上月数据" />
+      <DataUpdateNotice text="当月开单额、当月实际目标达成率每天 19:00 自动更新；月度累计：开单额、实际目标达成率、年度目标达成率、同比差额、同比增长率每月最后一天 19:00 更新至上月数据" />
 
       <SectionCard>
         <div className="mb-4 flex items-center justify-between">
@@ -504,21 +568,16 @@ export default function DepartmentShipping() {
                 <th rowSpan={2} className={cn(leftHeaderClass, 'w-[110px] min-w-[110px]')}>部门</th>
                 <th rowSpan={2} className={cn(leftHeaderClass, 'w-[120px] min-w-[120px]')}>分组</th>
                 <th rowSpan={2} className={cn(leftHeaderClass, 'w-[100px] min-w-[100px]')}>区域</th>
-                {sortableColumns.slice(0, 3).map((column) => (
+                {visibleColumns.slice(0, 3).map((column) => (
                   <th key={column.key} rowSpan={2} className={cn(leftHeaderClass, column.className, 'text-right')}>
                     <SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} />
                   </th>
                 ))}
-                <th colSpan={5} className="border-b border-l border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-center font-semibold text-[#111827]">1~4月</th>
-                {sortableColumns.slice(8).map((column) => (
-                  <th key={column.key} rowSpan={2} className={cn(leftHeaderClass, column.className, 'text-right')}>
-                    <SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} />
-                  </th>
-                ))}
+                <th colSpan={visibleColumns.slice(3).length} className="border-b border-l border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-center font-semibold text-[#111827]">1~4月</th>
                 <th rowSpan={2} className={actionHeaderClass}>操作</th>
               </tr>
               <tr>
-                {sortableColumns.slice(3, 8).map((column) => (
+                {visibleColumns.slice(3).map((column) => (
                   <th key={column.key} className={cn(leftHeaderClass, column.className, 'text-right')}>
                     <SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} />
                   </th>
@@ -526,20 +585,25 @@ export default function DepartmentShipping() {
               </tr>
             </thead>
             <tbody>
-              {tableRows.map((row) => {
-                const rowBg = row.rowType === 'total' ? 'bg-[#EEF2FF] font-semibold' : row.rowType === 'subtotal' ? 'bg-[#F8FAFC] font-semibold' : 'bg-white';
+              {displayRows.map((row) => {
+                const isSummary = row.rowType === 'total' || row.rowType === 'subtotal';
+                const rowBg = row.rowType === 'total' ? 'bg-[#EEF2FF]' : row.rowType === 'subtotal' ? 'bg-[#F8FAFC]' : 'bg-white';
                 return (
                   <tr key={row.id} className={cn(rowBg, row.rowType === undefined && 'hover:bg-[#F9FAFB]')}>
                     <td className={cn(bodyCellClass, rowBg, 'text-center')}>
                       <input type="checkbox" className="cursor-pointer" checked={selectedKeys.has(row.id)} onChange={() => toggleRow(row.id)} />
                     </td>
-                    <td className={cn(bodyCellClass, rowBg, 'font-semibold text-[#111827]')}>{row.department}</td>
-                    <td className={cn(bodyCellClass, rowBg, 'font-semibold text-[#111827]')}>{row.group}</td>
-                    <td className={cn(bodyCellClass, rowBg)}>{row.area}</td>
-                    {sortableColumns.map((column) => (
+                    {row.departmentRowSpan ? (
+                      <td rowSpan={row.departmentRowSpan} className={cn(bodyCellClass, rowBg, 'align-middle font-semibold text-[#111827]')}>{row.department}</td>
+                    ) : null}
+                    {row.groupRowSpan ? (
+                      <td rowSpan={row.groupRowSpan} className={cn(bodyCellClass, rowBg, 'align-middle', isSummary && 'font-semibold text-[#111827]')}>{row.group}</td>
+                    ) : null}
+                    <td className={cn(bodyCellClass, rowBg, isSummary && 'font-semibold text-[#111827]')}>{row.area}</td>
+                    {visibleColumns.map((column) => (
                       <td
                         key={`${row.id}-${column.key}`}
-                        className={cn(rightCellClass, rowBg, column.className, negativeClass(row[column.key]))}
+                        className={cn(rightCellClass, rowBg, column.className, isSummary && 'font-semibold text-[#111827]', negativeClass(row[column.key]))}
                       >
                         {renderValue(row, column.key)}
                       </td>

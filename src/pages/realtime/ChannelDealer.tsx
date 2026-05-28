@@ -75,6 +75,17 @@ const sortableColumns: { key: SortKey; label: string; className: string; sortabl
   { key: 'annualCompletionRate', label: '年度开单达成率', className: 'w-[150px] min-w-[150px]' },
 ];
 
+const visibleColumns: { key: SortKey; label: string; className: string; sortable?: boolean }[] = [
+  { key: 'currentOrder', label: '当月开单额', className: 'w-[150px] min-w-[150px]' },
+  { key: 'cumulativeShipping', label: '开单额', className: 'w-[140px] min-w-[140px]' },
+  { key: 'annualCompletionRate', label: '年度目标达成率', className: 'w-[150px] min-w-[150px]' },
+  { key: 'yoyDiff', label: '同比差额', className: 'w-[130px] min-w-[130px]', sortable: false },
+  { key: 'yoyGrowth', label: '同比增长率', className: 'w-[130px] min-w-[130px]', sortable: false },
+  { key: 'annualTarget', label: '年度目标额', className: 'w-[130px] min-w-[130px]', sortable: false },
+  { key: 'annualShipping', label: '年度开单额', className: 'w-[130px] min-w-[130px]' },
+];
+void sortableColumns;
+
 const headerClass = 'border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-3 text-left font-semibold text-[#111827]';
 const bodyClass = 'border-b border-r border-[#F3F4F6] px-3 py-3 text-left text-[#111827]';
 const rightBodyClass = 'border-b border-l border-[#F3F4F6] px-3 py-3 text-right';
@@ -196,6 +207,18 @@ function renderValue(row: TableRow | DetailRow, key: SortKey) {
   return '';
 }
 
+function getMonthlyYoy(row: TableRow | DetailRow, monthKey: MonthKey) {
+  const current = row[monthKey];
+  if (['jan', 'feb', 'mar', 'apr'].includes(monthKey) && row.totalJanApr !== 0) {
+    const diff = Number((row.yoyDiff * (current / row.totalJanApr)).toFixed(2));
+    const previous = current - diff;
+    return { diff, growth: toPercent(diff, previous) };
+  }
+  const previous = current * 0.9;
+  const diff = Number((current - previous).toFixed(2));
+  return { diff, growth: toPercent(diff, previous) };
+}
+
 function sortRows(rows: TableRow[], sortConfig: { key: SortKey; direction: SortDirection } | null) {
   if (!sortConfig) return rows;
   const total = rows.filter((row) => row.isTotal);
@@ -234,16 +257,23 @@ function MonthlyDetailDialog({ row, onClose }: { row: TableRow | DetailRow | nul
                 <thead>
                   <tr>
                     <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-left font-semibold">月份</th>
-                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">实际开单额</th>
+                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">开单额</th>
+                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">同比差额</th>
+                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">同比增长率</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {monthColumns.map((month) => (
-                    <tr key={month.key} className="hover:bg-[#F9FAFB]">
-                      <td className="border-b border-r border-[#F3F4F6] px-3 py-2">{month.label}</td>
-                      <td className={cn('border-b border-[#F3F4F6] px-3 py-2 text-right font-medium', negativeClass(row[month.key]))}>{formatMoney(row[month.key])}</td>
-                    </tr>
-                  ))}
+                  {monthColumns.map((month) => {
+                    const yoy = getMonthlyYoy(row, month.key);
+                    return (
+                      <tr key={month.key} className="hover:bg-[#F9FAFB]">
+                        <td className="border-b border-r border-[#F3F4F6] px-3 py-2">{month.label}</td>
+                        <td className={cn('border-b border-r border-[#F3F4F6] px-3 py-2 text-right font-medium', negativeClass(row[month.key]))}>{formatMoney(row[month.key])}</td>
+                        <td className={cn('border-b border-r border-[#F3F4F6] px-3 py-2 text-right font-medium', yoy.diff >= 0 ? 'text-[#059669]' : 'text-[#DC2626]')}>{yoy.diff >= 0 ? '+' : ''}{formatMoney(yoy.diff)}</td>
+                        <td className={cn('border-b border-[#F3F4F6] px-3 py-2 text-right font-medium', yoy.growth >= 0 ? 'text-[#059669]' : 'text-[#DC2626]')}>{yoy.growth >= 0 ? '+' : ''}{formatPct(yoy.growth)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -352,12 +382,13 @@ export default function ChannelDealer() {
           </Select>
         </div>
         <div className="flex items-center gap-4">
+          <span className="text-caption text-text-tertiary">每天19:00自动更新数据</span>
           <Button variant="outline" size="sm" onClick={resetFilters}>重置</Button>
           <Button size="sm" onClick={() => toast.success('查询完成', { description: '已按当前筛选条件刷新列表' })}>查询</Button>
         </div>
       </div>
 
-      <DataUpdateNotice text="当月实际开单额、年度开单额、年度开单达成率每天 19:00 自动更新；累计开单额、同比差额、同比增长率每月最后一天 19:00 更新至上月数据；" />
+      <DataUpdateNotice text="当月开单额、年度开单额、年度目标达成率每天 19:00 自动更新；月度累计：开单额、同比差额、同比增长率、年度目标达成率每月最后一天 19:00 更新至上月数据；" />
 
       <SectionCard>
         <div className="mb-4 flex items-center justify-between">
@@ -376,13 +407,13 @@ export default function ChannelDealer() {
                 <th rowSpan={2} className={cn(headerClass, 'w-[140px] min-w-[140px]')}>客户类型</th>
                 <th rowSpan={2} className={cn(headerClass, 'w-[180px] min-w-[180px]')}>部门</th>
                 <th rowSpan={2} className={cn(headerClass, 'w-[170px] min-w-[170px]')}>业务员</th>
-                <th rowSpan={2} className={cn(headerClass, sortableColumns[0].className, 'text-right')}><SortHeader column={sortableColumns[0]} sortConfig={sortConfig} onSort={toggleSort} /></th>
-                <th colSpan={3} className="border-b border-l border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-center font-semibold text-[#111827]">1~4月</th>
-                {sortableColumns.slice(4).map((column) => <th key={column.key} rowSpan={2} className={cn(headerClass, column.className, 'text-right')}><SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} /></th>)}
+                <th rowSpan={2} className={cn(headerClass, visibleColumns[0].className, 'text-right')}><SortHeader column={visibleColumns[0]} sortConfig={sortConfig} onSort={toggleSort} /></th>
+                <th colSpan={4} className="border-b border-l border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-center font-semibold text-[#111827]">1~4月</th>
+                {visibleColumns.slice(5).map((column) => <th key={column.key} rowSpan={2} className={cn(headerClass, column.className, 'text-right')}><SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} /></th>)}
                 <th rowSpan={2} className={actionHeaderClass}>操作</th>
               </tr>
               <tr>
-                {sortableColumns.slice(1, 4).map((column) => <th key={column.key} className={cn(headerClass, column.className, 'text-right')}><SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} /></th>)}
+                {visibleColumns.slice(1, 5).map((column) => <th key={column.key} className={cn(headerClass, column.className, 'text-right')}><SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} /></th>)}
               </tr>
             </thead>
             <tbody>
@@ -404,7 +435,7 @@ export default function ChannelDealer() {
                       <td className={cn(bodyClass, rowBg)}>{row.channelType}</td>
                       <td className={cn(bodyClass, rowBg)}>{row.department}</td>
                       <td className={cn(bodyClass, rowBg)}>{row.salesperson}</td>
-                      {sortableColumns.map((column) => <td key={`${row.id}-${column.key}`} className={cn(rightBodyClass, rowBg, column.className, negativeClass(row[column.key]))}>{renderValue(row, column.key)}</td>)}
+                      {visibleColumns.map((column) => <td key={`${row.id}-${column.key}`} className={cn(rightBodyClass, rowBg, column.className, negativeClass(row[column.key]))}>{renderValue(row, column.key)}</td>)}
                       <td className={cn(actionBodyClass, rowBg)}><Button variant="outline" size="sm" onClick={() => setDetailRow(row)} className="h-7 gap-1.5 px-2 text-[12px]"><CalendarDays className="h-3.5 w-3.5" />开单额明细</Button></td>
                     </tr>
                     {expanded && row.detailRows?.map((detail) => (
@@ -415,7 +446,7 @@ export default function ChannelDealer() {
                         <td className={bodyClass}>{detail.channelType}</td>
                         <td className={bodyClass}>{detail.department}</td>
                         <td className={bodyClass}>{detail.salesperson}</td>
-                        {sortableColumns.map((column) => <td key={`${detail.id}-${column.key}`} className={cn(rightBodyClass, column.className, negativeClass(column.key === 'annualCompletionRate' ? detail.completionRate : column.key === 'annualTarget' ? detail.signingAmount : column.key === 'annualShipping' ? getAnnualShipping(detail) : column.key === 'cumulativeShipping' ? detail.totalJanApr : column.key === 'currentOrder' ? detail[CURRENT_MONTH] : detail[column.key]))}>{renderValue(detail, column.key)}</td>)}
+                        {visibleColumns.map((column) => <td key={`${detail.id}-${column.key}`} className={cn(rightBodyClass, column.className, negativeClass(column.key === 'annualCompletionRate' ? detail.completionRate : column.key === 'annualTarget' ? detail.signingAmount : column.key === 'annualShipping' ? getAnnualShipping(detail) : column.key === 'cumulativeShipping' ? detail.totalJanApr : column.key === 'currentOrder' ? detail[CURRENT_MONTH] : detail[column.key]))}>{renderValue(detail, column.key)}</td>)}
                         <td className={actionBodyClass}><Button variant="outline" size="sm" onClick={() => setDetailRow(detail)} className="h-7 gap-1.5 px-2 text-[12px]"><CalendarDays className="h-3.5 w-3.5" />开单额明细</Button></td>
                       </tr>
                     ))}

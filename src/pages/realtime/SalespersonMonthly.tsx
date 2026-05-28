@@ -61,6 +61,12 @@ interface TableRow extends DetailRow {
   annualCompletionRate: number;
 }
 
+interface DisplayTableRow extends TableRow {
+  deptRowSpan?: number;
+  groupRowSpan?: number;
+  areaRowSpan?: number;
+}
+
 const CURRENT_MONTH_INDEX = 3;
 const CUMULATIVE_MONTH_COUNT = 4;
 const monthColumns = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'].map((label, index) => ({ label, index }));
@@ -75,6 +81,17 @@ const sortableColumns: { key: SortKey; label: string; className: string; sortabl
   { key: 'annualOrder', label: '年度开单额', className: 'w-[130px] min-w-[130px]' },
   { key: 'annualCompletionRate', label: '年度开单达成率', className: 'w-[150px] min-w-[150px]' },
 ];
+
+const visibleColumns: { key: SortKey; label: string; className: string; sortable?: boolean }[] = [
+  { key: 'currentTarget', label: '当月实际目标额', className: 'w-[140px] min-w-[140px]', sortable: false },
+  { key: 'currentOrder', label: '当月开单额', className: 'w-[140px] min-w-[140px]' },
+  { key: 'currentRate', label: '当月实际目标达成率', className: 'w-[160px] min-w-[160px]' },
+  { key: 'cumulativeActualTarget', label: '实际目标额', className: 'w-[140px] min-w-[140px]', sortable: false },
+  { key: 'cumulativeOrder', label: '开单额', className: 'w-[140px] min-w-[140px]' },
+  { key: 'cumulativeOrderRate', label: '实际目标达成率', className: 'w-[150px] min-w-[150px]' },
+  { key: 'annualCompletionRate', label: '年度目标达成率', className: 'w-[150px] min-w-[150px]' },
+];
+void sortableColumns;
 
 const headerClass = 'border-b border-r border-[#D8DEE9] bg-[#F8FAFC] px-2 py-3 text-left font-semibold text-[#111827]';
 const bodyClass = 'border-b border-r border-[#E5E7EB] px-2 py-3';
@@ -200,6 +217,40 @@ function buildTableRows(rows: DetailRow[], sortConfig: { key: SortKey; direction
   return [makeTotalRow(rows), ...detailRows];
 }
 
+function withRowSpans(rows: TableRow[]) {
+  const displayRows = rows.map((row) => ({ ...row })) as DisplayTableRow[];
+  const countSpan = (startIndex: number, same: (row: DisplayTableRow) => boolean) => {
+    let count = 0;
+    for (let index = startIndex; index < displayRows.length; index += 1) {
+      const item = displayRows[index];
+      if (item.isTotal || !same(item)) break;
+      count += 1;
+    }
+    return count;
+  };
+
+  displayRows.forEach((row, index) => {
+    const previous = displayRows[index - 1];
+    if (row.isTotal) {
+      row.deptRowSpan = 1;
+      row.groupRowSpan = 1;
+      row.areaRowSpan = 1;
+      return;
+    }
+    if (!previous || previous.isTotal || previous.dept !== row.dept) {
+      row.deptRowSpan = countSpan(index, (item) => item.dept === row.dept);
+    }
+    if (!previous || previous.isTotal || previous.dept !== row.dept || previous.group !== row.group) {
+      row.groupRowSpan = countSpan(index, (item) => item.dept === row.dept && item.group === row.group);
+    }
+    if (!previous || previous.isTotal || previous.dept !== row.dept || previous.group !== row.group || previous.area !== row.area) {
+      row.areaRowSpan = countSpan(index, (item) => item.dept === row.dept && item.group === row.group && item.area === row.area);
+    }
+  });
+
+  return displayRows;
+}
+
 function renderValue(row: TableRow, key: SortKey) {
   return key.endsWith('Rate') ? fmtPct(row[key]) : fmtCurrency(row[key]);
 }
@@ -233,8 +284,8 @@ function MonthlyDetailDialog({ row, onClose }: { row: TableRow | null; onClose: 
                   <tr>
                     <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-left font-semibold">月份</th>
                     <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">实际目标额</th>
-                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">实际开单额</th>
-                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">实际开单达成率</th>
+                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">开单额</th>
+                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">实际目标达成率</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -279,6 +330,7 @@ export default function SalespersonMonthly() {
     [departmentFilter, salespersonFilter, tabRows]
   );
   const tableRows = useMemo(() => buildTableRows(filteredRows, sortConfig), [filteredRows, sortConfig]);
+  const displayRows = useMemo(() => withRowSpans(tableRows), [tableRows]);
   const salespersonOptions = useMemo(() => Array.from(new Set(tabRows.map((row) => row.salesperson))), [tabRows]);
   const filterOptions = useMemo(
     () => SHIPPING_HIERARCHY_FILTER_OPTIONS.filter((option) => (companyTab === 'electronics' ? option.value === 'all' || option.value === 'department|河东电子' : !option.value.includes('河东电子'))),
@@ -340,7 +392,7 @@ export default function SalespersonMonthly() {
         </div>
       </div>
 
-      <DataUpdateNotice text="当月实际开单额、当月实际开单达成率、年度开单额、年度开单达成率每天 19:00 自动更新；累计开单额、累计开单达成率每月最后一天 19:00 更新至上月数据" />
+      <DataUpdateNotice text="当月开单额、当月实际目标达成率每天 19:00 自动更新；月度累计：开单额、实际目标达成率、年度目标达成率每月最后一天 19:00 更新至上月数据" />
 
       <SectionCard>
         <div className="mb-4 flex items-center justify-between">
@@ -358,26 +410,25 @@ export default function SalespersonMonthly() {
                 <th rowSpan={2} className={cn(headerClass, 'w-[100px] min-w-[100px]')}>分组</th>
                 <th rowSpan={2} className={cn(headerClass, 'w-[90px] min-w-[90px]')}>区域</th>
                 <th rowSpan={2} className={cn(headerClass, 'w-[100px] min-w-[100px]')}>业务员</th>
-                {sortableColumns.slice(0, 3).map((column) => <th key={column.key} rowSpan={2} className={cn(headerClass, column.className, 'text-right')}><SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} /></th>)}
-                <th colSpan={3} className="border-b border-l border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-center font-semibold text-[#111827]">1~4月</th>
-                {sortableColumns.slice(6).map((column) => <th key={column.key} rowSpan={2} className={cn(headerClass, column.className, 'text-right')}><SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} /></th>)}
+                {visibleColumns.slice(0, 3).map((column) => <th key={column.key} rowSpan={2} className={cn(headerClass, column.className, 'text-right')}><SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} /></th>)}
+                <th colSpan={visibleColumns.slice(3).length} className="border-b border-l border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-center font-semibold text-[#111827]">1~4月</th>
                 <th rowSpan={2} className={actionHeaderClass}>操作</th>
               </tr>
               <tr>
-                {sortableColumns.slice(3, 6).map((column) => <th key={column.key} className={cn(headerClass, column.className, 'text-right')}><SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} /></th>)}
+                {visibleColumns.slice(3).map((column) => <th key={column.key} className={cn(headerClass, column.className, 'text-right')}><SortHeader column={column} sortConfig={sortConfig} onSort={toggleSort} /></th>)}
               </tr>
             </thead>
             <tbody>
-              {tableRows.map((row) => {
-                const rowBg = row.isTotal ? 'bg-[#EEF2FF] font-semibold' : 'bg-white';
+              {displayRows.map((row) => {
+                const rowBg = row.isTotal ? 'bg-[#EEF2FF]' : 'bg-white';
                 return (
                   <tr key={row.id} className={cn(rowBg, !row.isTotal && 'hover:bg-[#F9FAFB]')}>
                     <td className={cn(bodyClass, rowBg, 'text-center')}><input type="checkbox" className="cursor-pointer" checked={selectedKeys.has(row.id)} onChange={() => setSelectedKeys((prev) => { const next = new Set(prev); next.has(row.id) ? next.delete(row.id) : next.add(row.id); return next; })} /></td>
-                    <td className={cn(bodyClass, rowBg, 'font-semibold')}>{row.dept}</td>
-                    <td className={cn(bodyClass, rowBg)}>{row.group}</td>
-                    <td className={cn(bodyClass, rowBg)}>{row.area}</td>
+                    {row.deptRowSpan ? <td rowSpan={row.deptRowSpan} className={cn(bodyClass, rowBg, 'align-middle font-semibold text-[#111827]')}>{row.dept}</td> : null}
+                    {row.groupRowSpan ? <td rowSpan={row.groupRowSpan} className={cn(bodyClass, rowBg, 'align-middle', row.isTotal && 'font-semibold text-[#111827]')}>{row.group}</td> : null}
+                    {row.areaRowSpan ? <td rowSpan={row.areaRowSpan} className={cn(bodyClass, rowBg, 'align-middle', row.isTotal && 'font-semibold text-[#111827]')}>{row.area}</td> : null}
                     <td className={cn(bodyClass, rowBg)}>{row.salesperson}</td>
-                    {sortableColumns.map((column) => <td key={`${row.id}-${column.key}`} className={cn(rightBodyClass, rowBg, column.className, negativeClass(row[column.key]))}>{renderValue(row, column.key)}</td>)}
+                    {visibleColumns.map((column) => <td key={`${row.id}-${column.key}`} className={cn(rightBodyClass, rowBg, column.className, row.isTotal && 'font-semibold text-[#111827]', negativeClass(row[column.key]))}>{renderValue(row, column.key)}</td>)}
                     <td className={cn(actionBodyClass, rowBg)}>
                       <Button variant="outline" size="sm" onClick={() => setDetailRow(row)} className="h-7 gap-1.5 px-2 text-[12px]"><CalendarDays className="h-3.5 w-3.5" />开单额明细</Button>
                     </td>

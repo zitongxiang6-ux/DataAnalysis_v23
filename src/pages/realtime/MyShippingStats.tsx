@@ -2,6 +2,13 @@ import { useMemo, useState } from 'react';
 import { KpiCard } from '@/components/ui/KpiCard';
 import { SectionCard } from '@/components/ui/SectionCard';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -9,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { ArrowDown, ArrowUp, Download } from 'lucide-react';
+import { ArrowDown, ArrowUp, CalendarDays, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
@@ -211,6 +218,18 @@ function getCustomerTotalRow(rows: ChannelDealerRow[]): ChannelDealerRow {
   };
 }
 
+function getMonthlyYoy(row: ChannelDealerRow, monthKey: MonthKey) {
+  const current = row[monthKey];
+  if (['jan', 'feb', 'mar', 'apr'].includes(monthKey) && row.totalJanApr !== 0) {
+    const diff = Number((row.yoyDiff * (current / row.totalJanApr)).toFixed(2));
+    const previous = current - diff;
+    return { diff, growth: toPercent(diff, previous) };
+  }
+  const previous = current * 0.9;
+  const diff = Number((current - previous).toFixed(2));
+  return { diff, growth: toPercent(diff, previous) };
+}
+
 function SortButton({
   active,
   direction,
@@ -240,8 +259,12 @@ function SortButton({
 function QuarterCell({ actual, target }: { actual: number; target: number }) {
   const diff = actual - target;
   const rate = toPercent(actual, target);
+  const achieved = actual >= target;
   return (
     <div className="space-y-1 leading-tight">
+      <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold', achieved ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600')}>
+        {achieved ? '达标' : '未达标'}
+      </span>
       <div className={negativeClass(target)}>目标 {fmtCurrency(target)}</div>
       <div className={negativeClass(actual)}>开单 {fmtCurrency(actual)}</div>
       <div className={diff >= 0 ? 'text-[#059669]' : 'text-[#DC2626]'}>
@@ -253,6 +276,48 @@ function QuarterCell({ actual, target }: { actual: number; target: number }) {
   );
 }
 
+function CustomerMonthlyDetailDialog({ row, onClose }: { row: ChannelDealerRow | null; onClose: () => void }) {
+  return (
+    <Dialog open={Boolean(row)} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[82vh] max-w-[760px] overflow-hidden p-5">
+        {row && (
+          <>
+            <DialogHeader className="gap-1">
+              <DialogTitle>开单额明细</DialogTitle>
+              <DialogDescription>{row.name} / {row.channelType}</DialogDescription>
+            </DialogHeader>
+            <div className="max-h-[52vh] overflow-y-auto rounded-md border border-[#E5E7EB]">
+              <table className="w-full border-collapse text-[12px]">
+                <thead>
+                  <tr>
+                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-left font-semibold">月份</th>
+                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">开单额</th>
+                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">同比差额</th>
+                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">同比增长率</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monthColumns.map((month) => {
+                    const yoy = getMonthlyYoy(row, month.key);
+                    return (
+                      <tr key={month.key} className="hover:bg-[#F9FAFB]">
+                        <td className="border-b border-r border-[#F3F4F6] px-3 py-2">{month.label}</td>
+                        <td className={cn('border-b border-r border-[#F3F4F6] px-3 py-2 text-right font-medium', negativeClass(row[month.key]))}>{fmtCurrency(row[month.key])}</td>
+                        <td className={cn('border-b border-r border-[#F3F4F6] px-3 py-2 text-right font-medium', yoy.diff >= 0 ? 'text-[#059669]' : 'text-[#DC2626]')}>{yoy.diff >= 0 ? '+' : ''}{fmtCurrency(yoy.diff)}</td>
+                        <td className={cn('border-b border-[#F3F4F6] px-3 py-2 text-right font-medium', yoy.growth >= 0 ? 'text-[#059669]' : 'text-[#DC2626]')}>{yoy.growth >= 0 ? '+' : ''}{fmtPct(yoy.growth)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function MyShippingStats() {
   const [year, setYear] = useState('2026');
   const [selectedCustomerKeys, setSelectedCustomerKeys] = useState<Set<string>>(new Set());
@@ -260,6 +325,7 @@ export default function MyShippingStats() {
   const [customerTypeFilter, setCustomerTypeFilter] = useState('all');
   const [customerNameFilter, setCustomerNameFilter] = useState('all');
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
+  const [detailRow, setDetailRow] = useState<ChannelDealerRow | null>(null);
 
   const businessRows = useMemo(() => {
     const { rows } = getSalespersonMonthlyData();
@@ -382,10 +448,10 @@ export default function MyShippingStats() {
       <div className="grid grid-cols-3 gap-4 xl:grid-cols-6">
         <KpiCard label="个人年度目标额" value={personalAnnualTarget} prefix="￥" format />
         <KpiCard label="个人年度开单额" value={personalAnnualOrder} prefix="￥" format delay={60} />
-        <KpiCard label="个人年度开单达成率" value={personalAnnualRate} suffix="%" delay={120} />
-        <KpiCard label="1-4月累计实际目标额" value={cumulativeActualTarget} prefix="￥" format delay={180} />
-        <KpiCard label="1-4月累计开单额" value={cumulativeOrder} prefix="￥" format delay={240} />
-        <KpiCard label="1-4月累计开单达成率" value={cumulativeOrderRate} suffix="%" delay={300} />
+        <KpiCard label="个人年度目标达成率" value={personalAnnualRate} suffix="%" delay={120} />
+        <KpiCard label="1-4月实际目标额" value={cumulativeActualTarget} prefix="￥" format delay={180} />
+        <KpiCard label="1-4月开单额" value={cumulativeOrder} prefix="￥" format delay={240} />
+        <KpiCard label="1-4月实际目标达成率" value={cumulativeOrderRate} suffix="%" delay={300} />
       </div>
 
       <SectionCard title="我的月度开单统计">
@@ -393,7 +459,7 @@ export default function MyShippingStats() {
           <table className="w-full border-collapse text-[12px]">
             <thead>
               <tr>
-                {['月份', '实际目标额', '实际开单额', '实际达成率'].map((title) => (
+                {['月份', '实际目标额', '开单额', '实际目标达成率'].map((title) => (
                   <th key={title} className={cn(tableHeaderClass, title !== '月份' && 'text-right')}>
                     {title}
                   </th>
@@ -485,23 +551,21 @@ export default function MyShippingStats() {
                 </th>
                 <th rowSpan={2} className={tableHeaderClass}>客户名称</th>
                 <th rowSpan={2} className={tableHeaderClass}>客户类型</th>
-                <th rowSpan={2} className={cn(tableHeaderClass, 'text-right')}>当月开单额</th>
-                <th colSpan={3} className={cn(tableHeaderClass, 'text-center')}>1-4月</th>
+                <th rowSpan={2} className={cn(tableHeaderClass, 'text-right')}>当月开单</th>
+                <th colSpan={4} className={cn(tableHeaderClass, 'text-center')}>1~4月</th>
                 <th rowSpan={2} className={cn(tableHeaderClass, 'text-right')}>年度目标额</th>
                 <th rowSpan={2} className={cn(tableHeaderClass, 'text-right')}>
                   年度开单额
                   <SortButton active={sortConfig?.key === 'annualOrder'} direction={sortConfig?.direction ?? 'desc'} onClick={() => toggleSort('annualOrder')} />
                 </th>
-                <th rowSpan={2} className={cn(tableHeaderClass, 'text-right')}>
-                  年度开单达成率
-                  <SortButton active={sortConfig?.key === 'annualCompletionRate'} direction={sortConfig?.direction ?? 'desc'} onClick={() => toggleSort('annualCompletionRate')} />
-                </th>
+                <th rowSpan={2} className={cn(tableHeaderClass, 'text-center')}>操作</th>
               </tr>
               <tr>
                 <th className={cn(tableHeaderClass, 'text-right')}>
-                  累计开单额
+                  开单额
                   <SortButton active={sortConfig?.key === 'cumulativeOrder'} direction={sortConfig?.direction ?? 'desc'} onClick={() => toggleSort('cumulativeOrder')} />
                 </th>
+                <th className={cn(tableHeaderClass, 'text-right')}>年度目标达成率</th>
                 <th className={cn(tableHeaderClass, 'text-right')}>同比差额</th>
                 <th className={cn(tableHeaderClass, 'text-right')}>同比增长率</th>
               </tr>
@@ -524,6 +588,7 @@ export default function MyShippingStats() {
                     <td className={tableCellClass}>{row.channelType}</td>
                     <td className={cn(tableCellClass, 'text-right', negativeClass(getCurrentMonthOrder(row)))}>{fmtCurrency(getCurrentMonthOrder(row))}</td>
                     <td className={cn(tableCellClass, 'text-right', negativeClass(row.totalJanApr))}>{fmtCurrency(row.totalJanApr)}</td>
+                    <td className={cn(tableCellClass, 'text-right', negativeClass(row.completionRate))}>{fmtPct(row.completionRate)}</td>
                     <td className={cn(tableCellClass, 'text-right', row.yoyDiff >= 0 ? 'text-[#059669]' : 'text-[#DC2626]')}>
                       {row.yoyDiff >= 0 ? '+' : ''}
                       {fmtCurrency(row.yoyDiff)}
@@ -534,7 +599,17 @@ export default function MyShippingStats() {
                     </td>
                     <td className={cn(tableCellClass, 'text-right', negativeClass(row.signingAmount))}>{fmtCurrency(row.signingAmount)}</td>
                     <td className={cn(tableCellClass, 'text-right', negativeClass(annualOrder))}>{fmtCurrency(annualOrder)}</td>
-                    <td className={cn(tableCellClass, 'text-right', negativeClass(row.completionRate))}>{fmtPct(row.completionRate)}</td>
+                    <td className={cn(tableCellClass, 'text-center')}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDetailRow(row)}
+                        className="h-7 gap-1.5 px-2 text-[12px]"
+                      >
+                        <CalendarDays className="h-3.5 w-3.5" />
+                        开单额明细
+                      </Button>
+                    </td>
                   </tr>
                 );
               })}
@@ -607,6 +682,7 @@ export default function MyShippingStats() {
           </table>
         </div>
       </SectionCard>
+      <CustomerMonthlyDetailDialog row={detailRow} onClose={() => setDetailRow(null)} />
     </div>
   );
 }
