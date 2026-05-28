@@ -218,18 +218,6 @@ function getCustomerTotalRow(rows: ChannelDealerRow[]): ChannelDealerRow {
   };
 }
 
-function getMonthlyYoy(row: ChannelDealerRow, monthKey: MonthKey) {
-  const current = row[monthKey];
-  if (['jan', 'feb', 'mar', 'apr'].includes(monthKey) && row.totalJanApr !== 0) {
-    const diff = Number((row.yoyDiff * (current / row.totalJanApr)).toFixed(2));
-    const previous = current - diff;
-    return { diff, growth: toPercent(diff, previous) };
-  }
-  const previous = current * 0.9;
-  const diff = Number((current - previous).toFixed(2));
-  return { diff, growth: toPercent(diff, previous) };
-}
-
 function SortButton({
   active,
   direction,
@@ -291,23 +279,16 @@ function CustomerMonthlyDetailDialog({ row, onClose }: { row: ChannelDealerRow |
                 <thead>
                   <tr>
                     <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-left font-semibold">月份</th>
-                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">开单额</th>
-                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">同比差额</th>
-                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">同比增长率</th>
+                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">开单额</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {monthColumns.map((month) => {
-                    const yoy = getMonthlyYoy(row, month.key);
-                    return (
-                      <tr key={month.key} className="hover:bg-[#F9FAFB]">
-                        <td className="border-b border-r border-[#F3F4F6] px-3 py-2">{month.label}</td>
-                        <td className={cn('border-b border-r border-[#F3F4F6] px-3 py-2 text-right font-medium', negativeClass(row[month.key]))}>{fmtCurrency(row[month.key])}</td>
-                        <td className={cn('border-b border-r border-[#F3F4F6] px-3 py-2 text-right font-medium', yoy.diff >= 0 ? 'text-[#059669]' : 'text-[#DC2626]')}>{yoy.diff >= 0 ? '+' : ''}{fmtCurrency(yoy.diff)}</td>
-                        <td className={cn('border-b border-[#F3F4F6] px-3 py-2 text-right font-medium', yoy.growth >= 0 ? 'text-[#059669]' : 'text-[#DC2626]')}>{yoy.growth >= 0 ? '+' : ''}{fmtPct(yoy.growth)}</td>
-                      </tr>
-                    );
-                  })}
+                  {monthColumns.map((month) => (
+                    <tr key={month.key} className="hover:bg-[#F9FAFB]">
+                      <td className="border-b border-r border-[#F3F4F6] px-3 py-2">{month.label}</td>
+                      <td className={cn('border-b border-[#F3F4F6] px-3 py-2 text-right font-medium', negativeClass(row[month.key]))}>{fmtCurrency(row[month.key])}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -558,6 +539,7 @@ export default function MyShippingStats() {
                   年度开单额
                   <SortButton active={sortConfig?.key === 'annualOrder'} direction={sortConfig?.direction ?? 'desc'} onClick={() => toggleSort('annualOrder')} />
                 </th>
+                <th rowSpan={2} className={cn(tableHeaderClass, 'text-right')}>年度目标达成率</th>
                 <th rowSpan={2} className={cn(tableHeaderClass, 'text-center')}>操作</th>
               </tr>
               <tr>
@@ -599,6 +581,7 @@ export default function MyShippingStats() {
                     </td>
                     <td className={cn(tableCellClass, 'text-right', negativeClass(row.signingAmount))}>{fmtCurrency(row.signingAmount)}</td>
                     <td className={cn(tableCellClass, 'text-right', negativeClass(annualOrder))}>{fmtCurrency(annualOrder)}</td>
+                    <td className={cn(tableCellClass, 'text-right', negativeClass(row.completionRate))}>{fmtPct(row.completionRate)}</td>
                     <td className={cn(tableCellClass, 'text-center')}>
                       <Button
                         variant="outline"

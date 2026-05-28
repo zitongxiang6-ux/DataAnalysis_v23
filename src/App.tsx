@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router'
-import ReportCenter from './pages/ReportCenter'
 import WeeklyReport from './pages/WeeklyReport'
 import CompanyWeeklyReport from './pages/CompanyWeeklyReport'
 import CompanyMonthlyReport from './pages/CompanyMonthlyReport'
@@ -18,9 +17,9 @@ import ReviewPage from './pages/rebate/ReviewPage'
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/report-center" replace />} />
-      <Route path="/report-center" element={<ReportCenter />} />
-      <Route path="/my-sales-reports" element={<ReportCenter viewMode="mine" />} />
+      <Route path="/" element={<Navigate to="/realtime-reports?tab=my-shipping" replace />} />
+      <Route path="/report-center" element={<Navigate to="/realtime-reports?tab=my-shipping" replace />} />
+      <Route path="/my-sales-reports" element={<Navigate to="/realtime-reports?tab=my-shipping" replace />} />
       <Route path="/weekly-report/company/:reportId" element={<CompanyWeeklyReport />} />
       <Route path="/monthly-report/company/:reportId" element={<CompanyMonthlyReport />} />
       <Route path="/quarterly-report/company/:reportId" element={<CompanyQuarterlyReport />} />
