@@ -94,6 +94,9 @@ function getSalespersonArea(group: string, index: number) {
   if (group.includes('国内渠道')) {
     return index < 4 ? '维护组' : index < 8 ? '开拓组' : '地产组';
   }
+  if (group === 'ODM组') {
+    return index === 0 ? '国际ODM组' : '国内ODM组';
+  }
   return '-';
 }
 

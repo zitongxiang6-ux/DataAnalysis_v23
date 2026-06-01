@@ -14,24 +14,24 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
-type UpdateMode = 'today' | 'range';
+type UpdateMode = 'month' | 'range';
 
 export function UpdateDataDialog() {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<UpdateMode>('today');
+  const [mode, setMode] = useState<UpdateMode>('month');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
 
   const handleConfirm = () => {
     if (mode === 'range' && (!startTime || !endTime)) {
-      toast.info('请选择开始时间和结束时间');
+      toast.info('请选择开始月份和结束月份');
       return;
     }
 
     toast.success('数据更新任务已提交', {
       description:
-        mode === 'today'
-          ? '将更新昨天更新时间至当前操作时间内产生的数据。'
+        mode === 'month'
+          ? '将更新本月1号至当前操作时间内产生的数据。'
           : '将按所选时间段重新计算数据，并重新核算退单剔除。',
     });
     setOpen(false);
@@ -57,17 +57,17 @@ export function UpdateDataDialog() {
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => setMode('today')}
+              onClick={() => setMode('month')}
               className={cn(
                 'rounded-lg border p-4 text-left transition-colors',
-                mode === 'today'
+                mode === 'month'
                   ? 'border-primary bg-primary-light text-text-primary'
                   : 'border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]'
               )}
             >
-              <div className="text-sm font-semibold">更新今天数据</div>
+              <div className="text-sm font-semibold">更新本月数据</div>
               <div className="mt-1 text-xs leading-5 text-text-secondary">
-                默认从昨天更新时间到当前操作时间，更新期间产生的数据。
+                默认更新本月1号至当前操作时间内产生的数据。
               </div>
             </button>
             <button
@@ -82,7 +82,7 @@ export function UpdateDataDialog() {
             >
               <div className="text-sm font-semibold">选择时间段</div>
               <div className="mt-1 text-xs leading-5 text-text-secondary">
-                重新计算指定开始时间和结束时间内的数据。
+                重新计算指定开始月份和结束月份范围内的数据。
               </div>
             </button>
           </div>
@@ -91,17 +91,17 @@ export function UpdateDataDialog() {
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="space-y-1.5">
-                  <span className="text-xs font-medium text-text-secondary">开始时间</span>
+                  <span className="text-xs font-medium text-text-secondary">开始月份</span>
                   <Input
-                    type="datetime-local"
+                    type="month"
                     value={startTime}
                     onChange={(event) => setStartTime(event.target.value)}
                   />
                 </label>
                 <label className="space-y-1.5">
-                  <span className="text-xs font-medium text-text-secondary">结束时间</span>
+                  <span className="text-xs font-medium text-text-secondary">结束月份</span>
                   <Input
-                    type="datetime-local"
+                    type="month"
                     value={endTime}
                     onChange={(event) => setEndTime(event.target.value)}
                   />

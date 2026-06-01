@@ -41,10 +41,28 @@ interface AttributionRow {
 }
 
 const salespersons = ['张三', '李华', '王芳', '赵强', '刘敏', '陈杰', '杨丽', '黄磊', '周涛', '吴静'];
-const docTypes = ['销货单', '销售退单', '换货单'];
+const docTypes = ['销货单', '销售退单'];
 const businessTypes = ['项目销售', '渠道销售', '样板间', '年度框架'];
 const productSeries = ['智能照明', '智能面板', '能源管理', '酒店客控'];
 const customers = ['广州科技', '深圳光明', '北京宏远', '上海信达', '杭州智联', '成都华盛', '武汉天成', '南京瑞景', '西安宏图', '重庆新兴'];
+const ownershipDepartmentOptions = [
+  { value: '全球渠道部', label: '全球渠道部' },
+  { value: '全球渠道部 / 国际渠道组', label: '　国际渠道组' },
+  { value: '全球渠道部 / 国际渠道组 / 维护组', label: '　　维护组' },
+  { value: '全球渠道部 / 国际渠道组 / 发展组', label: '　　发展组' },
+  { value: '全球渠道部 / 国际渠道组 / 开拓组', label: '　　开拓组' },
+  { value: '全球渠道部 / 国内渠道组', label: '　国内渠道组' },
+  { value: '全球渠道部 / 国内渠道组 / 维护组', label: '　　维护组' },
+  { value: '全球渠道部 / 国内渠道组 / 开拓组', label: '　　开拓组' },
+  { value: '全球渠道部 / 国内渠道组 / 地产组', label: '　　地产组' },
+  { value: '全球渠道部 / ODM组', label: '　ODM组' },
+  { value: '全球渠道部 / ODM组 / 国际ODM组', label: '　　国际ODM组' },
+  { value: '全球渠道部 / ODM组 / 国内ODM组', label: '　　国内ODM组' },
+  { value: '国内大客户部', label: '国内大客户部' },
+  { value: '国际酒店部', label: '国际酒店部' },
+  { value: '储能事业部', label: '储能事业部' },
+  { value: '河东电子', label: '河东电子' },
+];
 
 const initialRows: AttributionRow[] = Array.from({ length: 36 }, (_, index) => {
   const department = SHIPPING_DEPARTMENTS[index % SHIPPING_DEPARTMENTS.length];
@@ -337,7 +355,7 @@ export default function RuleConfiguration() {
                   导入更新
                 </Button>
                 <SelectBox label="批量修改归属业务员" value={batchSalesperson} onChange={setBatchSalesperson} options={salespersons} placeholder="不修改业务员" />
-                <SelectBox label="批量修改归属部门" value={batchDept} onChange={setBatchDept} options={SHIPPING_DEPARTMENTS} placeholder="不修改部门" />
+                <SelectBox label="批量修改归属部门" value={batchDept} onChange={setBatchDept} options={ownershipDepartmentOptions} placeholder="不修改部门" />
                 <Button size="sm" className="h-9" disabled={!canBatchUpdate} onClick={applyBatchAssignment}>
                   确认批量修改
                 </Button>
@@ -443,7 +461,7 @@ export default function RuleConfiguration() {
                       <td className="sticky right-0 z-10 border-b border-l border-[#D8E5FF] bg-[#F8FAFF] px-3 py-2">
                         <select value={row.assignedDept} onChange={(event) => updateAssignment(row.id, 'assignedDept', event.target.value)} className="h-8 w-full rounded-md border border-[#D1D5DB] bg-white px-2 text-[13px] outline-none focus:border-[#1A56DB]">
                           <option value="">未设置</option>
-                          {SHIPPING_DEPARTMENTS.map((department) => <option key={department} value={department}>{department}</option>)}
+                          {ownershipDepartmentOptions.map((department) => <option key={department.value} value={department.value}>{department.label}</option>)}
                         </select>
                       </td>
                     </tr>
@@ -530,13 +548,17 @@ function SelectField({ label, value, onChange, options }: { label: string; value
   );
 }
 
-function SelectBox({ label, value, onChange, options, placeholder }: { label: string; value: string; onChange: (value: string) => void; options: string[]; placeholder: string }) {
+function SelectBox({ label, value, onChange, options, placeholder }: { label: string; value: string; onChange: (value: string) => void; options: (string | { value: string; label: string })[]; placeholder: string }) {
   return (
     <div className="min-w-[180px]">
       <label className="mb-1 block text-[12px] text-[#6B7280]">{label}</label>
       <select value={value} onChange={(event) => onChange(event.target.value)} className="h-9 w-full rounded-md border border-[#D1D5DB] bg-white px-3 text-[13px] outline-none focus:border-[#1A56DB]">
         <option value="">{placeholder}</option>
-        {options.map((option) => <option key={option} value={option}>{option}</option>)}
+        {options.map((option) => {
+          const optionValue = typeof option === 'string' ? option : option.value;
+          const optionLabel = typeof option === 'string' ? option : option.label;
+          return <option key={optionValue} value={optionValue}>{optionLabel}</option>;
+        })}
       </select>
     </div>
   );

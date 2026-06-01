@@ -386,7 +386,7 @@ export default function SalespersonMonthly() {
           </Select>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-caption text-text-tertiary">每天19:00自动更新数据</span>
+          <span className="text-caption text-text-tertiary">最近完成更新时间：19:20:31</span>
           <Button variant="outline" size="sm" onClick={handleReset}>重置</Button>
           <Button size="sm" onClick={() => toast.success('查询完成', { description: '已按当前筛选条件刷新列表' })}>查询</Button>
         </div>

@@ -125,6 +125,18 @@ function getPreviousCumulative(row: ChannelDealerRow) {
   return row.totalJanApr - row.yoyDiff;
 }
 
+function getMonthlyYoy(row: TableRow | DetailRow, monthKey: MonthKey) {
+  const current = row[monthKey];
+  if (['jan', 'feb', 'mar', 'apr'].includes(monthKey) && row.totalJanApr !== 0) {
+    const diff = Number((row.yoyDiff * (current / row.totalJanApr)).toFixed(2));
+    const previous = current - diff;
+    return { diff, growth: toPercent(diff, previous) };
+  }
+  const previous = current * 0.9;
+  const diff = Number((current - previous).toFixed(2));
+  return { diff, growth: toPercent(diff, previous) };
+}
+
 function splitDealerRow(row: ChannelDealerRow): DetailRow[] {
   const departments = splitMultiValue(row.department);
   const salespersons = splitMultiValue(row.salesperson);
@@ -245,16 +257,27 @@ function MonthlyDetailDialog({ row, onClose }: { row: TableRow | DetailRow | nul
                 <thead>
                   <tr>
                     <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-left font-semibold">月份</th>
-                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">开单额</th>
+                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">开单额</th>
+                    <th className="sticky top-0 border-b border-r border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">同比差额</th>
+                    <th className="sticky top-0 border-b border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2 text-right font-semibold">同比增长率</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {monthColumns.map((month) => (
-                    <tr key={month.key} className="hover:bg-[#F9FAFB]">
-                      <td className="border-b border-r border-[#F3F4F6] px-3 py-2">{month.label}</td>
-                      <td className={cn('border-b border-[#F3F4F6] px-3 py-2 text-right font-medium', negativeClass(row[month.key]))}>{formatMoney(row[month.key])}</td>
-                    </tr>
-                  ))}
+                  {monthColumns.map((month) => {
+                    const yoy = getMonthlyYoy(row, month.key);
+                    return (
+                      <tr key={month.key} className="hover:bg-[#F9FAFB]">
+                        <td className="border-b border-r border-[#F3F4F6] px-3 py-2">{month.label}</td>
+                        <td className={cn('border-b border-r border-[#F3F4F6] px-3 py-2 text-right font-medium', negativeClass(row[month.key]))}>{formatMoney(row[month.key])}</td>
+                        <td className={cn('border-b border-r border-[#F3F4F6] px-3 py-2 text-right font-medium', yoy.diff >= 0 ? 'text-[#059669]' : 'text-[#DC2626]')}>
+                          {yoy.diff >= 0 ? '+' : ''}{formatMoney(yoy.diff)}
+                        </td>
+                        <td className={cn('border-b border-[#F3F4F6] px-3 py-2 text-right font-medium', yoy.growth >= 0 ? 'text-[#059669]' : 'text-[#DC2626]')}>
+                          {yoy.growth >= 0 ? '+' : ''}{formatPct(yoy.growth)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -363,7 +386,7 @@ export default function ChannelDealer() {
           </Select>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-caption text-text-tertiary">每天19:00自动更新数据</span>
+          <span className="text-caption text-text-tertiary">最近完成更新时间：19:20:31</span>
           <Button variant="outline" size="sm" onClick={resetFilters}>重置</Button>
           <Button size="sm" onClick={() => toast.success('查询完成', { description: '已按当前筛选条件刷新列表' })}>查询</Button>
         </div>

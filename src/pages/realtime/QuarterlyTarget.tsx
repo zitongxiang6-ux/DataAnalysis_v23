@@ -68,7 +68,7 @@ function QuarterCell({ actual, target }: { actual: number; target: number }) {
         {diff > 0 ? `缺口${formatYuan(diff)}` : `超额${formatYuan(Math.abs(diff))}`}
       </div>
       <div className={rate >= 100 ? 'text-[11px] leading-tight text-success font-semibold' : 'text-[11px] leading-tight text-danger font-semibold'}>
-        {rate.toFixed(1)}%
+        达成率 {rate.toFixed(1)}%
       </div>
       <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${rate >= 100 ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
         {status}
@@ -331,7 +331,7 @@ export default function QuarterlyTarget() {
 
         <div className="flex items-center gap-4">
           <span className="text-caption text-text-tertiary">
-            每天19:00自动更新数据
+            最近完成更新时间：19:20:31
           </span>
           <Button variant="outline" size="sm" onClick={handleCancel}>
             重置

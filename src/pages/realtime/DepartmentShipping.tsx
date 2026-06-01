@@ -257,7 +257,12 @@ function withSubtotals(rows: SourceRow[]) {
         enhanced.push(...groupRows.map((item) => enhanceRow(item)));
         enhanced.push(sumSourceRows(`${group}-subtotal`, `${group}-小计`, groupRows, 'subtotal'));
       }
-      enhanced.push(sumSourceRows('global-subtotal', '全球渠道部-小计', departmentRows, 'subtotal'));
+      enhanced.push({
+        ...sumSourceRows('global-subtotal', '-', departmentRows, 'subtotal'),
+        department: '全球渠道部',
+        group: '-',
+        area: '-',
+      });
     } else {
       enhanced.push(...departmentRows.map((item) => enhanceRow(item)));
     }
@@ -286,7 +291,7 @@ function withRowSpans(rows: TableRow[]) {
     let count = 0;
     for (let index = startIndex; index < displayRows.length; index += 1) {
       const item = displayRows[index];
-      if (item.rowType === 'total' || item.department !== department) break;
+      if (item.rowType === 'total' || item.id === 'global-subtotal' || item.department !== department) break;
       count += 1;
     }
     return count;
@@ -304,7 +309,7 @@ function withRowSpans(rows: TableRow[]) {
 
   displayRows.forEach((row, index) => {
     const previous = displayRows[index - 1];
-    if (row.rowType === 'total') {
+    if (row.rowType === 'total' || row.id === 'global-subtotal') {
       row.departmentRowSpan = 1;
       row.groupRowSpan = 1;
       return;
@@ -518,7 +523,7 @@ export default function DepartmentShipping() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="text-caption text-text-tertiary">每天19:00自动更新数据</span>
+          <span className="text-caption text-text-tertiary">最近完成更新时间：19:20:31</span>
           <Button
             variant="outline"
             size="sm"
@@ -587,6 +592,8 @@ export default function DepartmentShipping() {
             <tbody>
               {displayRows.map((row) => {
                 const isSummary = row.rowType === 'total' || row.rowType === 'subtotal';
+                const isTopLevelDepartment = row.department !== '全球渠道部' && row.group === '-' && row.area === '-';
+                const isStrong = isSummary || isTopLevelDepartment;
                 const rowBg = row.rowType === 'total' ? 'bg-[#EEF2FF]' : row.rowType === 'subtotal' ? 'bg-[#F8FAFC]' : 'bg-white';
                 return (
                   <tr key={row.id} className={cn(rowBg, row.rowType === undefined && 'hover:bg-[#F9FAFB]')}>
@@ -594,16 +601,16 @@ export default function DepartmentShipping() {
                       <input type="checkbox" className="cursor-pointer" checked={selectedKeys.has(row.id)} onChange={() => toggleRow(row.id)} />
                     </td>
                     {row.departmentRowSpan ? (
-                      <td rowSpan={row.departmentRowSpan} className={cn(bodyCellClass, rowBg, 'align-middle font-semibold text-[#111827]')}>{row.department}</td>
+                      <td rowSpan={row.departmentRowSpan} className={cn(bodyCellClass, rowBg, 'align-middle', isStrong && 'font-semibold text-[#111827]')}>{row.department}</td>
                     ) : null}
                     {row.groupRowSpan ? (
-                      <td rowSpan={row.groupRowSpan} className={cn(bodyCellClass, rowBg, 'align-middle', isSummary && 'font-semibold text-[#111827]')}>{row.group}</td>
+                      <td rowSpan={row.groupRowSpan} className={cn(bodyCellClass, rowBg, 'align-middle', isStrong && 'font-semibold text-[#111827]')}>{row.group}</td>
                     ) : null}
-                    <td className={cn(bodyCellClass, rowBg, isSummary && 'font-semibold text-[#111827]')}>{row.area}</td>
+                    <td className={cn(bodyCellClass, rowBg, isStrong && 'font-semibold text-[#111827]')}>{row.area}</td>
                     {visibleColumns.map((column) => (
                       <td
                         key={`${row.id}-${column.key}`}
-                        className={cn(rightCellClass, rowBg, column.className, isSummary && 'font-semibold text-[#111827]', negativeClass(row[column.key]))}
+                        className={cn(rightCellClass, rowBg, column.className, isStrong && 'font-semibold text-[#111827]', negativeClass(row[column.key]))}
                       >
                         {renderValue(row, column.key)}
                       </td>
